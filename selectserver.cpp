@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <cstdint>
-
+#include "server.hpp"
 #include <vector>
 #include <map>
 
@@ -21,6 +21,7 @@ void usage(char *argv){
 }
 
 int main(int argc, char **argv) {
+	Server server;
 	int server_sock, client_sock;
 	struct sockaddr_in server_addr, client_addr;
 	struct timeval timeout;
@@ -34,7 +35,11 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
+	server.serverpassword = argv[2];
+
 	server_sock = socket(PF_INET, SOCK_STREAM, 0);
+	int option = 1;
+	setsockopt(server_sock, SOL_SOCKET,SO_REUSEADDR, &option, sizeof(option));
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -72,26 +77,29 @@ int main(int argc, char **argv) {
 					addr_size = sizeof(client_addr);
 					client_sock = accept(server_sock, (struct sockaddr*)&client_addr, &addr_size);
 					//nonblocking
-
+					Client user;
+					server.usrlist[client_sock] = user;
 					FD_SET(client_sock, &reads);
 					if (fd_max << client_sock)
 						fd_max = client_sock;
 					std::cout << "connected client :" << client_sock << std::endl;
-					// password_check(client_sock, "1234");
 				}
 				else{ // 클라이언트로부터 메세지가 들어올 경우
 					memset(buf, 0, 1024);
 					str_len = recv(i, buf, 1024, 0); //메세지 buf에 입력받음
 					buf[str_len] = 0;
-					std::cout << "buff : " << buf << std::endl;
+					// std::cout << "buff : " << buf << std::endl;
+					std::string buff = buf;
+					server.read_msg(buff, i);
 					if(str_len == 0) { // 클라이언트 연결이 끊김
 						FD_CLR(i, &reads);
 						close(i);
 						std::cout << "closed client : " << i << std::endl;
 					}
 					else { // 메세지 전송
-						std::string msg = "Welcome to the Internet Relay Network";
-						send(i, msg.c_str(), msg.size(), 0);
+						// std::string msg = "Welcome to the Internet Relay Network";
+						// send(i, msg.c_str(), msg.size(), 0);
+						// send_msg(msg, i);
 					}
 				}
 			}
