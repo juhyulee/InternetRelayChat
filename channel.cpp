@@ -5,28 +5,28 @@ Channel::Channel() {
 	usrlimits = 0;
 }
 
-void Channel::adduser(std::string user, Client client) {
+void Channel::adduser(int fd, Client client) {
 	usrcnt += 1;
 	if (usrcnt > usrlimits) {
 		return ; //유저수 초과 메세지 전송
 	}
 	if (usrcnt == 1) {
-		setchanneloperator(user);
+		setchanneloperator(client.nickname);
 	}
-	usrlist[user] = client;
+	usrlist[fd] = client;
 }
 
-void Channel::deleteuser(std::string user) {//유저 usrlist에서 지우는 함수
+void Channel::deleteuser(int fd) {//유저 usrlist에서 지우는 함수
 
-	if (usrlist.find(user) != usrlist.end())
-		usrlist.erase(usrlist.find(user));
+	if (usrlist.find(fd) != usrlist.end())
+		usrlist.erase(usrlist.find(fd));
 	else {
 		//에러메세지 전송
 	}
 }
 
-void Channel::inviteuser(std::string user, Client client) {//채널에 유저 초대하는 함수
-	adduser(user, client);
+void Channel::inviteuser(int fd, Client client) {//채널에 유저 초대하는 함수
+	adduser(fd,client);
 }
 
 void Channel::setchannelname(std::string chanellname) {

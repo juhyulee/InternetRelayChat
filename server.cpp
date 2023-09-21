@@ -62,7 +62,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	}
 	else if (token[0] == "JOIN") {
 		make_channel(token[1]);
-		clist[token[1]].adduser(usrlist[fd].nickname, usrlist[fd]);
+		clist[token[1]].adduser(fd, usrlist[fd]);
 		if (clist[token[1]].usrlist.size() == 1) {
 			clist[token[1]].setchanneloperator(usrlist[fd].nickname);
 		}

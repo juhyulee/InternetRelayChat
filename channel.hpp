@@ -25,9 +25,9 @@ class Channel {
 		//특정 유저한테 보낼 메세지 서버로 보냄
 		//전체 유저한테 보낼 메세지 서버로 보냄
 
-		void adduser(std::string user, Client client); //유저 채널에 추가하는 함수
-		void deleteuser(std::string user);//유저 usrlist에서 지우는 함수
-		void inviteuser(std::string user, Client client);//채널에 유저 초대하는 함수
+		void adduser(int fd, Client client); //유저 채널에 추가하는 함수
+		void deleteuser(int fd);//유저 usrlist에서 지우는 함수
+		void inviteuser(int fd, Client client);//채널에 유저 초대하는 함수
 };
 
 #endif
