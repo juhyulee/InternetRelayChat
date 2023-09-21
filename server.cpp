@@ -68,7 +68,10 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 	}
 	else if (token[0] == "PART") { //채널나가는명령어
-
+		for (int i = 1; i < token.size(); i++) {
+			Channel	targetChannel = this->clist[token[i]];
+			targetChannel.deleteuser(targetChannel.usrlist[fd].nickname);
+		}
 	}
 	else if (token[0] == "NOTICE") {//메세지전송
 

@@ -16,7 +16,7 @@ class Channel {
 		int usrlimits; //최대 유저 인원수
 	public :
 		Channel();
-		std::map<std::string, Client> usrlist; //유저목록
+		std::map<int, Client> usrlist; //유저목록
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);
