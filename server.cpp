@@ -68,16 +68,22 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 	}
 	else if (token[0] == "PART") { //채널나가는명령어
-		for (int i = 1; i < token.size(); i++) {
+		for (int i = 1; i <= token.size(); i++) {
 			Channel	targetChannel = this->clist[token[i]];
-			targetChannel.deleteuser(targetChannel.usrlist[fd].nickname);
+			targetChannel.deleteuser(fd);
 		}
 	}
 	else if (token[0] == "NOTICE") {//메세지전송
 
 	}
 	else if (token[0] == "PRIVMSG") {//메세지 전송
-
+		for (int i = 1; i < token.size(); i++) {
+			if (token[i][0] == '#')
+				int send_fd = this->clist[];
+			else if (token[i][0] == '$')
+				int	send_fd = this->usrlist.find(token[i]);
+			this->send_msg(token[token.size()], );
+		}
 	}
 	else if (token[0] == "KICK") { //채널 방출
 
