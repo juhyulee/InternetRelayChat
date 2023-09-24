@@ -1,9 +1,8 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include "util.h"
+#include "client.hpp"
 
-class Server;
 
 class Channel {
 	private :
@@ -17,6 +16,8 @@ class Channel {
 	public :
 		Channel();
 		std::map<int, Client> usrlist; //유저목록
+		std::string getchannelname();
+		int	getusrcnt();
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);

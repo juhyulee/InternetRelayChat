@@ -1,4 +1,4 @@
-#include "util.h"
+#include "channel.hpp"
 
 Channel::Channel() {
 	usrcnt = 0;
@@ -27,6 +27,14 @@ void Channel::deleteuser(int fd) {//유저 usrlist에서 지우는 함수
 
 void Channel::inviteuser(int fd, Client client) {//채널에 유저 초대하는 함수
 	adduser(fd,client);
+}
+
+std::string Channel::getchannelname() {
+    return this->channelname;
+}
+
+int	Channel::getusrcnt() {
+	return this->usrcnt;
 }
 
 void Channel::setchannelname(std::string chanellname) {
@@ -72,9 +80,6 @@ void Channel::setchannelmode(std::string mod) {
 		else
 			channelmod[0] = "l";
 	}
-
 }
 //특정 유저한테 보낼 메세지 서버로 보냄
 //전체 유저한테 보낼 메세지 서버로 보냄
-
-
