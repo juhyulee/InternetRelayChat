@@ -79,10 +79,10 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	else if (token[0] == "PRIVMSG") {//메세지 전송
 		for (int i = 1; i < token.size(); i++) {
 			if (token[i][0] == '#')
-				int send_fd = this->clist[];
+				int send_fd = this->clist[token[i]].fd;
 			else if (token[i][0] == '$')
 				int	send_fd = this->usrlist.find(token[i]);
-			this->send_msg(token[token.size()], );
+			this->send_msg(token[token.size()], send_fd);
 		}
 	}
 	else if (token[0] == "KICK") { //채널 방출
