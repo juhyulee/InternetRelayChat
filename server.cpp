@@ -77,7 +77,11 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 	}
 	else if (token[0] == "NOTICE") {//메세지전송
-
+		Channel *target_channel = this->search_channel(token[1]);
+		for (std::map<int, Client>::iterator iter = target_channel->usrlist.begin();
+			iter != target_channel->usrlist.end(); ++iter) {
+			this->send_msg(token[token.size()], iter->second.fd);
+		}
 	}
 	else if (token[0] == "PRIVMSG") {//메세지 전송
 		for (int i = 1; i < token.size(); i++) {
