@@ -118,13 +118,13 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		if (token.size() != 3) {
 			// 유효하지 않은 명령어
 		}
-		Channel *invite_channel = this->search_channel(token[2]);
-		if (invite_channel == NULL) {
-			// 존재하지 않는 채널
-		}
 		Client *invite_client = this->search_user(token[1]);
 		if (invite_client == NULL) {
 			// 존재하지 않는 유저
+		}
+		Channel *invite_channel = this->search_channel(token[2]);
+		if (invite_channel == NULL) {
+			// 존재하지 않는 채널
 		}
 		invite_channel->adduser(fd, *invite_client);
 	}
