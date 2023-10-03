@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "channel.hpp"
 #include <iterator>
+#include <ostream>
 #include <sstream>
 #include <utility>
 //10.11.3.2
@@ -83,12 +84,12 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 			this->send_msg(token[token.size()], iter->second.fd);
 		}
 	}
-	else if (token[0] == "PRIVMSG") {//메세지 전송
-		for (int i = 1; i < token.size(); i++) {
+	else if (token[0] == "PRIVMSG") { //메세지 전송
+		for (int i = 1; i < token.size() - 1; i++) {
 			if (token[i][0] == '#') {
 				Channel *target_channel = this->search_channel(token[i]);
 				for (std::map<int, Client>::iterator iter = target_channel->usrlist.begin();
-				    iter != target_channel->usrlist.end(); ++iter) {
+					iter != target_channel->usrlist.end(); ++iter) {
 					this->send_msg(token[token.size()], iter->second.fd);
 				}
 			}
@@ -96,13 +97,36 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 				int	send_fd = this->search_user(token[i])->fd;
 				this->send_msg(token[token.size()], send_fd);
 			}
+			else {
+			// Error: 올바르지 않은 형식의 command
+			}
 		}
 	}
 	else if (token[0] == "KICK") { //채널 방출
-
+		Channel *target_channel = this->search_channel(token[1]);
+		Client *target_user = target_channel->search_user(token[2]);
+		target_channel->deleteuser(target_user->fd);
+		std::stringstream kick_message;
+		kick_message << target_channel->getchannelname() << ". kicked from the channel.";
+		if (token.size() < 3) {
+			kick_message << " : " << token[3];
+		}
+		kick_message << std::endl;
+		this->send_msg(kick_message.str(), target_user->fd);
 	}
 	else if (token[0] == "INVITE") { //채널에 유저 초대
-
+		if (token.size() != 3) {
+			// 유효하지 않은 명령어
+		}
+		Channel *invite_channel = this->search_channel(token[2]);
+		if (invite_channel == NULL) {
+			// 존재하지 않는 채널
+		}
+		Client *invite_client = this->search_user(token[1]);
+		if (invite_client == NULL) {
+			// 존재하지 않는 유저
+		}
+		invite_channel->adduser(fd, *invite_client);
 	}
 	else if (token[0] == "TOPIC") { //채널 토픽 설정
 
@@ -133,19 +157,19 @@ void Server::make_channel(std::string channelname) {
 }
 
 Channel *Server::search_channel(std::string channelname) {
-    for (std::map<std::string, Channel>::iterator iter = this->clist.begin(); iter != this->clist.end(); ++iter) {
-        if (iter->second.getchannelname() == channelname)
-            return &iter->second;
-    }
-    return NULL;
+	for (std::map<std::string, Channel>::iterator iter = this->clist.begin(); iter != this->clist.end(); ++iter) {
+		if (iter->second.getchannelname() == channelname)
+		return &iter->second;
+	}
+	return NULL;
 }
 
 Client *Server::search_user(std::string nickname) {
-    for (std::map<int, Client>::iterator iter = this->usrlist.begin(); iter != this->usrlist.end(); ++iter) {
-        if (iter->second.nickname == nickname)
-            return &iter->second;
-    }
-    return NULL;
+	for (std::map<int, Client>::iterator iter = this->usrlist.begin(); iter != this->usrlist.end(); ++iter) {
+		if (iter->second.nickname == nickname)
+		return &iter->second;
+	}
+	return NULL;
 }
 
 void Server::adduser(Client user, int fd) {

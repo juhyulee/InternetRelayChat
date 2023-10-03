@@ -16,10 +16,20 @@ void Channel::adduser(int fd, Client client) {
 	usrlist[fd] = client;
 }
 
+Client *Channel::search_user(std::string nickname) {
+	for (std::map<int, Client>::iterator iter = this->usrlist.begin(); iter != this->usrlist.end(); ++iter) {
+		if (iter->second.nickname == nickname)
+		return &iter->second;
+	}
+	return NULL;
+}
+
 void Channel::deleteuser(int fd) {//유저 usrlist에서 지우는 함수
 
-	if (usrlist.find(fd) != usrlist.end())
+	if (usrlist.find(fd) != usrlist.end()) {
 		usrlist.erase(usrlist.find(fd));
+		usrcnt--;
+	}
 	else {
 		//에러메세지 전송
 	}
@@ -30,7 +40,7 @@ void Channel::inviteuser(int fd, Client client) {//채널에 유저 초대하는
 }
 
 std::string Channel::getchannelname() {
-    return this->channelname;
+	return this->channelname;
 }
 
 int	Channel::getusrcnt() {
