@@ -33,6 +33,7 @@ class Channel {
 		//전체 유저한테 보낼 메세지 서버로 보냄
 
 		void adduser(int fd, Client client); //유저 채널에 추가하는 함수
+		Client *search_user(std::string nickname);
 		void deleteuser(int fd);//유저 usrlist에서 지우는 함수
 		void delnick(std::string nick);
 		void inviteuser(int fd, Client client);//채널에 유저 초대하는 함수
