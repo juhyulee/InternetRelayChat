@@ -75,6 +75,9 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		for (int i = 1; i <= token.size(); i++) {
 			Channel	targetChannel = this->clist[token[i]];
 			targetChannel.deleteuser(fd);
+			if (targetChannel.usrlist.size() == 0) {
+				this->clist.erase(clist.find(token[i]));
+			}
 		}
 	}
 	else if (token[0] == "NOTICE") {//메세지전송
