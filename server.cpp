@@ -12,6 +12,17 @@ void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
 	send(fd, msg.c_str(), msg.size(), 0);
 }
 
+void Server::send_msg_all(std::string msg, std::string channel) { //자기포함
+	Channel tmp = clist[channel];
+	for (std::map<int, Client>::iterator iter = tmp.usrlist.begin(); iter != this->usrlist.end(); ++iter) {
+		send_msg(msg, iter->first);
+	}
+}
+
+void Server::send_msg_all1(std::string msg, std::string channel) { //자기제외
+
+}
+
 void Server::read_msg(std::string msg, int fd) { // 메세지 읽는 함수
 	std::vector<std::string> token;
 	std::istringstream iss(msg);
@@ -29,29 +40,43 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	std::vector<std::string> token;
 	std::istringstream iss(cmd);
 	std::string word;
+	int paramcnt = 0;
 
 	while (iss >> word) {
 		token.push_back(word);
+		paramcnt += 1;
 	}
 	std::cout << "token: " << token[0] << std::endl;
 	if (token[0] == "PASS") {
+		if (paramcnt != 2) {
+			send_msg(ERR_NEEDMOREPARAMS(usrlist[fd].username, "PASS"));
+		}
 		if (token[1] == serverpassword) {
 			usrlist[fd].pass += 1;
 			usrlist[fd].fd = fd;
+		}
+		else if (token[1] != serverpassword) {
+			send_msg(ERR_PASSWDMISMATCH(usrlist[fd].username));
+			close(fd);
 		}
 	}
 	else if (token[0] == "NICK") {
 		std::map<int, Client>::iterator it;
 		for (it = usrlist.begin(); it != usrlist.end(); ++it) {
 			if (it->second.nickname == token[1]) {
-				std::string msg = token[1] + " :Nickname is already in use\r\n";
-				send_msg(msg, fd);
+				send_msg(ERR_NICKNAMEINUSE(usrlist[fd].username));
 			}
 		}
 		usrlist[fd].nickname = token[1];
 		usrlist[fd].pass += 1;
 	}
 	else if (token[0] == "USER") { //생성자로 대체
+		if (paramcnt == 1) {
+			send_msg(ERR_NEEDMOREPARAMS(usrlist[fd].username, "USER"));
+		}
+		if (usrlist[fd].username) {
+			send_msg(ERR_ALREADYREGISTRED("root"));
+		}
 		usrlist[fd].username = token[1];
 		usrlist[fd].hostname = token[2];
 		usrlist[fd].servername = token[3];
@@ -61,8 +86,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	}
 
 	else if (token[0] == "PING") {
-		std::string pong = "PONG irc_test \r\n";
-		send_msg(pong, fd);
+		send_msg(RPL_PONG(usrlist[fd].username),fd);
 	}
 	else if (token[0] == "JOIN") {
 		make_channel(token[1]);
