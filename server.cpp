@@ -79,7 +79,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	}
 	else if (token[0] == "NOTICE") {//메세지전송
 		Channel *target_channel = this->search_channel(token[1]);
-		for (std::map<int, Client>::iterator iter = target_channel->usrlist.begin();
+		for (std::map<int, Client>::iterator iter = target_channel->usrlist.begin(); \
 			iter != target_channel->usrlist.end(); ++iter) {
 			this->send_msg(token[token.size()], iter->second.fd);
 		}
@@ -126,7 +126,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		if (invite_channel == NULL) {
 			// 존재하지 않는 채널
 		}
-		invite_channel->adduser(fd, *invite_client);
+		invite_channel->adduser(invite_client->fd, *invite_client);
 	}
 	else if (token[0] == "TOPIC") { //채널 토픽 설정
 
@@ -135,7 +135,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 
 	}
 	else if (token[0] == "QUIT") { //다른 유저들한테 나갔다고 보냄
-
+		close(fd);
 	}
 }
 
