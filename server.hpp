@@ -1,9 +1,8 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-class Channel;
-
-#include "util.h"
+#include "channel.hpp"
+#include "client.hpp"
 
 class Server {
 	private :
@@ -19,11 +18,11 @@ class Server {
 		void send_msg(std::string msg, int fd); //메세지 보내는 함수
 		void handle_cmd(std::string cmd, int fd);
 		void make_channel(std::string channelname);//채널 만들어주는 함수
+		Channel *search_channel(std::string channelname);
+		Client *search_user(std::string nickname);
 		void adduser(Client user, int fd); //서버에 유저 추가
 		void deluser(Client user, int fd); //서버에서 유저 삭제
 		void checkuserinformation(Client& user);
-
-
 };
 //메세지 보내는 함수
 //메세지 받는 함수

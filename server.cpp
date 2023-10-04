@@ -1,5 +1,8 @@
 #include "server.hpp"
+#include "channel.hpp"
+#include <iterator>
 #include <sstream>
+#include <utility>
 //10.11.3.2
 //irssi -c 10.12.7.6 -p 6770 -n juhyulee -w 1234
 //서버네임 숫자 닉네임 메세지
@@ -69,16 +72,32 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 	}
 	else if (token[0] == "PART") { //채널나가는명령어
-		for (int i = 1; i < token.size(); i++) {
+		for (int i = 1; i <= token.size(); i++) {
 			Channel	targetChannel = this->clist[token[i]];
-			targetChannel.deleteuser(targetChannel.usrlist[fd].nickname);
+			targetChannel.deleteuser(fd);
 		}
 	}
 	else if (token[0] == "NOTICE") {//메세지전송
-
+		Channel *target_channel = this->search_channel(token[1]);
+		for (std::map<int, Client>::iterator iter = target_channel->usrlist.begin();
+			iter != target_channel->usrlist.end(); ++iter) {
+			this->send_msg(token[token.size()], iter->second.fd);
+		}
 	}
 	else if (token[0] == "PRIVMSG") {//메세지 전송
-
+		for (int i = 1; i < token.size(); i++) {
+			if (token[i][0] == '#') {
+				Channel *target_channel = this->search_channel(token[i]);
+				for (std::map<int, Client>::iterator iter = target_channel->usrlist.begin();
+				    iter != target_channel->usrlist.end(); ++iter) {
+					this->send_msg(token[token.size()], iter->second.fd);
+				}
+			}
+			else if (token[i][0] == '$') {
+				int	send_fd = this->search_user(token[i])->fd;
+				this->send_msg(token[token.size()], send_fd);
+			}
+		}
 	}
 	else if (token[0] == "KICK") { //채널 방출
 
@@ -112,6 +131,22 @@ void Server::make_channel(std::string channelname) {
 	newchannel.setchannelname(channelname);
 
 	clist[channelname] = newchannel;
+}
+
+Channel *Server::search_channel(std::string channelname) {
+    for (std::map<std::string, Channel>::iterator iter = this->clist.begin(); iter != this->clist.end(); ++iter) {
+        if (iter->second.getchannelname() == channelname)
+            return &iter->second;
+    }
+    return NULL;
+}
+
+Client *Server::search_user(std::string nickname) {
+    for (std::map<int, Client>::iterator iter = this->usrlist.begin(); iter != this->usrlist.end(); ++iter) {
+        if (iter->second.nickname == nickname)
+            return &iter->second;
+    }
+    return NULL;
 }
 
 void Server::adduser(Client user, int fd) {
