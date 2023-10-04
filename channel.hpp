@@ -16,7 +16,10 @@ class Channel {
 		int usrlimits; //최대 유저 인원수
 	public :
 		Channel();
+
 		std::map<int, Client> usrlist; //유저목록
+		std::map<std::string, int>usrnicklist; //유저닉-fd
+
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);
@@ -27,6 +30,7 @@ class Channel {
 
 		void adduser(int fd, Client client); //유저 채널에 추가하는 함수
 		void deleteuser(int fd);//유저 usrlist에서 지우는 함수
+		void delnick(std::string nick);
 		void inviteuser(int fd, Client client);//채널에 유저 초대하는 함수
 };
 

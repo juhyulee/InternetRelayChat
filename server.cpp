@@ -1,7 +1,7 @@
 #include "server.hpp"
 #include <sstream>
 //10.11.3.2
-//irssi -c 10.12.2.6 -p 6770 -n juhyulee -w 1234
+//irssi -c 10.12.7.6 -p 6770 -n juhyulee -w 1234
 //서버네임 숫자 닉네임 메세지
 
 void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
@@ -45,6 +45,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 			}
 		}
 		usrlist[fd].nickname = token[1];
+		usrnicklist[token[1]] = fd;
 		usrlist[fd].pass += 1;
 	}
 	else if (token[0] == "USER") { //생성자로 대체
@@ -57,7 +58,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	}
 
 	else if (token[0] == "PING") {
-		std::string pong = "PONG irc_test \r\n";
+		std::string pong = "PONG irc_test\r\n";
 		send_msg(pong, fd);
 	}
 	else if (token[0] == "JOIN") {
@@ -120,3 +121,12 @@ void Server::adduser(Client user, int fd) {
 void Server::deluser(Client user, int fd) {
 	usrlist.erase(usrlist.find(fd));
 }
+
+// std::map<std::string, ICommand*> command;
+
+// command[token[0]]->run(token);
+
+// class ICommand
+// {
+
+// };
