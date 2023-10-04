@@ -3,7 +3,6 @@
 
 #include "client.hpp"
 
-
 class Channel {
 	private :
 		std::string channelname; // 채널이름
@@ -17,13 +16,8 @@ class Channel {
 		Channel();
 
 		std::map<int, Client> usrlist; //유저목록
-<<<<<<< HEAD
-		std::map<std::string, int>usrnicklist; //유저닉-fd
-
-=======
 		std::string getchannelname();
 		int	getusrcnt();
->>>>>>> b8977bbdeebce854509219a460878f1acaed2825
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);
@@ -35,7 +29,6 @@ class Channel {
 		void adduser(int fd, Client client); //유저 채널에 추가하는 함수
 		Client *search_user(std::string nickname);
 		void deleteuser(int fd);//유저 usrlist에서 지우는 함수
-		void delnick(std::string nick);
 		void inviteuser(int fd, Client client);//채널에 유저 초대하는 함수
 };
 

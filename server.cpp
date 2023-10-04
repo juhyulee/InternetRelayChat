@@ -1,5 +1,4 @@
 #include "server.hpp"
-#include "channel.hpp"
 #include <iterator>
 #include <ostream>
 #include <sstream>
@@ -49,7 +48,6 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 			}
 		}
 		usrlist[fd].nickname = token[1];
-		usrnicklist[token[1]] = fd;
 		usrlist[fd].pass += 1;
 	}
 	else if (token[0] == "USER") { //생성자로 대체

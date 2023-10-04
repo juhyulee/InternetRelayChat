@@ -14,7 +14,6 @@ void Channel::adduser(int fd, Client client) {
 		setchanneloperator(client.nickname);
 	}
 	usrlist[fd] = client;
-	usrnicklist[client.nickname] = fd;
 }
 
 Client *Channel::search_user(std::string nickname) {
@@ -33,12 +32,6 @@ void Channel::deleteuser(int fd) {//유저 usrlist에서 지우는 함수
 	}
 	else {
 		//에러메세지 전송
-	}
-}
-
-void Channel::delnick(std::string nick) {
-	if (usrnicklist.find(nick) != usrnicklist.end()) {
-		usrnicklist.erase(usrnicklist.find(nick))
 	}
 }
 

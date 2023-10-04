@@ -2,7 +2,6 @@
 #define SERVER_HPP
 
 #include "channel.hpp"
-#include "client.hpp"
 
 class Server {
 	private :
@@ -11,7 +10,6 @@ class Server {
 		std::map<std::string, Channel> clist; //채널목록
 
 		std::map<int, Client> usrlist; //유저목록
-		std::map<std::string, int> usrnicklist; //유저목록
 
 		std::string serverpassword; //서버비밀번호
 		void read_msg(std::string msg, int fd); //메세지 받는 함수
