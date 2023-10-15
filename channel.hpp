@@ -22,6 +22,7 @@ class Channel {
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);
+		std::string getchanneloperator() const;
 		void setchanneltopic(std::string newtopic);
 		void setchannelmode(std::string mod);
 		//특정 유저한테 보낼 메세지 서버로 보냄

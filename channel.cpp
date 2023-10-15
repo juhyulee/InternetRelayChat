@@ -2,7 +2,7 @@
 
 Channel::Channel() {
 	usrcnt = 0;
-	usrlimits = 0;
+	usrlimits = 3;
 }
 
 void Channel::adduser(int fd, Client client) {
@@ -45,6 +45,11 @@ std::string Channel::getchannelname() {
 
 std::string Channel::getchanneltopic() {
 	return this->channeltopic;
+}
+
+std::string Channel::getchanneloperator() const
+{
+	return this->channeloperator;
 }
 
 int	Channel::getusrcnt() {
