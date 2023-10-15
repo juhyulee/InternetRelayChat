@@ -15,6 +15,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
+
+#include "message.h"
 // #include "client.hpp"
 // #include "server.hpp"
 // #include "channel.hpp"

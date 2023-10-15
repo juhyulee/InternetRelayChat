@@ -1,4 +1,5 @@
 #include "server.hpp"
+#include "util.h"
 #include <iterator>
 #include <ostream>
 #include <set>
@@ -72,8 +73,11 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		if (clist[token[1]].usrlist.size() == 1) {
 			clist[token[1]].setchanneloperator(usrlist[fd].nickname);
 		}
-		std::string join_message = usrlist[fd].nickname + " JOIN " + token[1] + "\r\n";
-		this->send_msg(join_message, fd);
+		
+		for (std::map<int,Client>::iterator iter = this->clist[token[1]].usrlist.begin(); 
+		iter != this->clist[token[1]].usrlist.end(); iter++) {
+			this->send_msg(RPL_JOIN(iter->second.nickname, token[1]), fd);
+		}
 	}
 	else if (token[0] == "PART") { //채널나가는명령어
 		for (int i = 1; i <= token.size(); i++) {
