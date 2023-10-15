@@ -65,11 +65,15 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		send_msg(pong, fd);
 	}
 	else if (token[0] == "JOIN") {
-		make_channel(token[1]);
+		if (this->search_channel(token[1]) == NULL) {
+			make_channel(token[1]);
+		}
 		clist[token[1]].adduser(fd, usrlist[fd]);
 		if (clist[token[1]].usrlist.size() == 1) {
 			clist[token[1]].setchanneloperator(usrlist[fd].nickname);
 		}
+		std::string join_message = usrlist[fd].nickname + " JOIN " + token[1] + "\r\n";
+		this->send_msg(join_message, fd);
 	}
 	else if (token[0] == "PART") { //채널나가는명령어
 		for (int i = 1; i <= token.size(); i++) {
