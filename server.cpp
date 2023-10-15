@@ -61,12 +61,9 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		usrlist[fd].pass += 1;
 	}
 	else if (token[0] == "USER") { //생성자로 대체
-		if (paramcnt == 1) {
+		if (paramcnt != 5) {
 			send_msg(ERR_NEEDMOREPARAMS(usrlist[fd].username, "USER"), fd);
 		}
-		// if () {
-		// 	send_msg(ERR_ALREADYREGISTRED("root"));
-		// }
 		usrlist[fd].username = token[1];
 		usrlist[fd].hostname = token[2];
 		usrlist[fd].servername = token[3];
@@ -191,12 +188,14 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 		invite_channel->adduser(invite_client->fd, *invite_client);
 	}
-	else if (token[0] == "TOPIC") { //채널 토픽 설정
-		if (token.size() == 1) {
+	else if (token[0] == "TOPIC") { //토픽 + 채널명 - 토픽띄움 / 토픽 + 채널명 + 변경토픽 - 토픽변경
+		if (token.size() == 2) { //토픽 띄움
 			std::string view_topic = this->search_channel(token[1])->getchanneltopic();
-			send_msg(view_topic, fd);
+			if (view_topic.empty())
+				send_msg(RPL_NOTOPIC(clist[token[1]].usrlist[fd].nickname,token[1]),fd);
 		}
-		else {
+		else if (token.size() == 3) { // 토픽 변경
+			//오퍼레이터 확인
 			Channel *target_channel = this->search_channel(token[1]);
 			target_channel->setchanneltopic(token[2]);
 		}
