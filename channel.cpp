@@ -2,7 +2,7 @@
 
 Channel::Channel() {
 	usrcnt = 0;
-	usrlimits = 0;
+	usrlimits = 3;
 }
 
 void Channel::adduser(int fd, Client client) {
@@ -41,6 +41,15 @@ void Channel::inviteuser(int fd, Client client) {//채널에 유저 초대하는
 
 std::string Channel::getchannelname() {
 	return this->channelname;
+}
+
+std::string Channel::getchanneltopic() {
+	return this->channeltopic;
+}
+
+std::string Channel::getchanneloperator() const
+{
+	return this->channeloperator;
 }
 
 int	Channel::getusrcnt() {

@@ -12,3 +12,11 @@ std::string realname, int fd) {
 	this->realname = realname;
 	this->fd = fd;
 }
+
+std::string Client::getPrefix() const
+{
+    std::string username = "!" + this->username;
+    std::string hostname = "@" + this->hostname;
+
+    return this->nickname + username + hostname;
+}

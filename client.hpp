@@ -17,6 +17,7 @@ class Client {
 		Client(std::string username, std::string hostname, std::string servername,
 		std::string realname, int fd);
 
+		std::string getPrefix() const;
 };
 
 #endif

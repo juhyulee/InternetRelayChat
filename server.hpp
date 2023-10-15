@@ -2,7 +2,6 @@
 #define SERVER_HPP
 
 #include "channel.hpp"
-#include "client.hpp"
 
 // error
 #define ERR_TOOMANYCHANNELS(user, channel) "405 " + user + " " + channel + " :You have joined too many channels"
@@ -63,7 +62,9 @@ class Server {
 	public :
 		std::string servername; //ㅓ버이름
 		std::map<std::string, Channel> clist; //채널목록
+
 		std::map<int, Client> usrlist; //유저목록
+
 		std::string serverpassword; //서버비밀번호
 		void read_msg(std::string msg, int fd); //메세지 받는 함수
 		void send_msg(std::string msg, int fd); //메세지 보내는 함수
