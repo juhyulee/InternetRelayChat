@@ -43,6 +43,10 @@ std::string Channel::getchannelname() {
 	return this->channelname;
 }
 
+std::string Channel::getchanneltopic() {
+	return this->channeltopic;
+}
+
 int	Channel::getusrcnt() {
 	return this->usrcnt;
 }

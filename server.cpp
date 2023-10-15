@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include <iterator>
 #include <ostream>
+#include <set>
 #include <sstream>
 #include <utility>
 //10.11.3.2
@@ -131,12 +132,30 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		invite_channel->adduser(invite_client->fd, *invite_client);
 	}
 	else if (token[0] == "TOPIC") { //채널 토픽 설정
-
+		if (token.size() == 1) {
+			std::string view_topic = this->search_channel(token[1])->getchanneltopic();
+			send_msg(view_topic, fd);
+		}
+		else {
+			Channel *target_channel = this->search_channel(token[1]);
+			target_channel->setchanneltopic(token[2]);
+		}
 	}
 	else if (token[0] == "MODE") { //채널모드설정
 
 	}
 	else if (token[0] == "QUIT") { //다른 유저들한테 나갔다고 보냄
+		std::string quit_message = usrlist[fd].nickname + " :Quit\r\n";
+		std::set<int> receive_user;
+		for (std::map<int, Client>::iterator iter = usrlist.begin(); iter != usrlist.end(); iter++) {
+			if (iter->first != fd) {
+				receive_user.insert(iter->first);
+			}
+		}
+		for (std::set<int>::iterator iter = receive_user.begin(); iter != receive_user.end(); iter++) {
+			send_msg(quit_message, *iter);
+			std::cout << "iter test: " << *iter << std::endl;
+		}
 		close(fd);
 	}
 }

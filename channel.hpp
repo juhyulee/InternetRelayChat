@@ -17,6 +17,7 @@ class Channel {
 
 		std::map<int, Client> usrlist; //유저목록
 		std::string getchannelname();
+		std::string getchanneltopic();
 		int	getusrcnt();
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
