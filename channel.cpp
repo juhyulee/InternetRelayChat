@@ -39,21 +39,32 @@ void Channel::inviteuser(int fd, Client client) {//채널에 유저 초대하는
 	adduser(fd,client);
 }
 
-std::string Channel::getchannelname() {
+std::string Channel::getchannelname() const {
 	return this->channelname;
 }
 
-std::string Channel::getchanneltopic() {
-	return this->channeltopic;
+std::string Channel::getchannelpassword() const {
+	return this->channelpassword;
 }
 
-std::string Channel::getchanneloperator() const
-{
+std::string Channel::getchanneloperator() const {
 	return this->channeloperator;
 }
 
-int	Channel::getusrcnt() {
+std::string Channel::getchanneltopic() const {
+	return this->channeltopic;
+}
+
+std::set<char> Channel::getchannelmode() const {
+	return this->channelmode;
+}
+
+int	Channel::getusrcnt() const {
 	return this->usrcnt;
+}
+
+int	Channel::getusrlimits() const {
+	return this->usrlimits;
 }
 
 void Channel::setchannelname(std::string chanellname) {
@@ -68,36 +79,37 @@ void Channel::setchanneloperator(std::string newoperator) {
 void Channel::setchanneltopic(std::string newtopic) {
 	this->channeltopic = newtopic;
 }
-void Channel::setchannelmode(std::string mod) {
-	if (mod == "i") { //초대만 가능한 채널로 설정
-		if (channelmod[0] == "i")
-			channelmod.erase(channelmod.begin() + 1);
-		else
-			channelmod[0] = "i";
-	}
-	else if (mod == "t") { //채널 오퍼레이터만 토픽을 설정할 수 있음
-		if (channelmod[0] == "t")
-			channelmod.erase(channelmod.begin() + 2);
-		else
-			channelmod[0] = "t";
-	}
-	else if (mod == "k") { //채널 패스워드 설정
-		if (channelmod[0] == "k")
-			channelmod.erase(channelmod.begin() + 3);
-		else
-			channelmod[0] = "k";
-	}
-	else if (mod == "o") { //채널 오퍼레이터 권한줌
-		if (channelmod[0] == "o")
-			channelmod.erase(channelmod.begin() + 4);
-		else
-			channelmod[0] = "o";
-	}
-	else if (mod == "l") { //채널 유저 수 제한
-		if (channelmod[0] == "l")
-			channelmod.erase(channelmod.begin() + 5);
-		else
-			channelmod[0] = "l";
+void Channel::setchannelmode(std::string mode) {
+	int switch_mode = 0;
+	std::set<char> *channelmode = &this->channelmode;
+	std::set<char> setmode;
+	for (int i = 0; i < mode.size(); i++) {
+		if (mode[i] == '+') {
+			switch_mode = 0;
+		}
+		else if (mode[i] == '-') {
+			switch_mode = 1;
+		}
+		else if (mode[i] == 'i') { //초대만 가능한 채널로 설정
+			if (switch_mode == 0) {
+				if (channelmode->find('i') == channelmode->end()) {
+					channelmode->insert(mode[i]);
+				}
+			}
+			else if (switch_mode == 1) {
+				if (channelmode->find('i') != channelmode->end()) {
+					channelmode->erase(mode[i]);
+				}
+			}
+		}
+		else if (mode[i] == 't') { //채널 오퍼레이터만 토픽을 설정할 수 있음
+		}
+		else if (mode[i] == 'k') { //채널 패스워드 설정
+		}
+		else if (mode[i] == 'o') { //채널 오퍼레이터 권한줌
+		}
+		else if (mode[i] == 'l') { //채널 유저 수 제한
+		}
 	}
 }
 //특정 유저한테 보낼 메세지 서버로 보냄

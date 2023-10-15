@@ -36,7 +36,7 @@
 # define RPL_ENDOFNAMES(user, channel) "366 " + user + " " + channel + " :End of /NAMES list." + "\r\n"
 # define RPL_LISTSTART(user) "321 " + user + " Channel :Users Name" + "\r\n"
 # define RPL_LIST(user, channel, visible, mode, topic) "322 " + user + " " + channel + " " + visible + " :" + mode + " " + topic + "\r\n"
-# define RPL_LISTEND(user) "323 " + user + ":End of /LIST"
+# define RPL_LISTENED(user) "323 " + user + ":End of /LIST"
 # define RPL_NOTOPIC(user, channel) "331 " + user + " " + channel + " :No topic is set" + "\r\n"
 # define RPL_INVITING(user, nick, channel) "341 " + user + " " + nick + " :" + channel + "\r\n"
 # define RPL_CHANNELMODEIS(user, channel, modes, params) "324 " + user + " " + channel + " " + modes + params + "\r\n"

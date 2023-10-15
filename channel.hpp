@@ -2,6 +2,7 @@
 #define CHANNEL_HPP
 
 #include "client.hpp"
+#include <set>
 
 class Channel {
 	private :
@@ -9,20 +10,23 @@ class Channel {
 		std::string channelpassword; //채널비밀번호
 		std::string channeloperator; //채널오퍼레이터
 		std::string channeltopic; //채널토픽
-		std::vector<std::string> channelmod; //채널모드
+		std::set<char> channelmode; //채널모드
 		int usrcnt; //유저 인원수
 		int usrlimits; //최대 유저 인원수
 	public :
 		Channel();
 
 		std::map<int, Client> usrlist; //유저목록
-		std::string getchannelname();
-		std::string getchanneltopic();
-		int	getusrcnt();
+		std::string getchannelname() const;
+		std::string getchannelpassword() const;
+		std::string getchanneloperator() const;
+		std::string getchanneltopic() const;
+		std::set<char> getchannelmode() const;
+		int	getusrcnt() const;
+		int	getusrlimits() const;
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);
-		std::string getchanneloperator() const;
 		void setchanneltopic(std::string newtopic);
 		void setchannelmode(std::string mod);
 		//특정 유저한테 보낼 메세지 서버로 보냄

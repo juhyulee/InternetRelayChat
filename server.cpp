@@ -82,7 +82,6 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	else if (token[0] == "JOIN") {
 		if (this->search_channel(token[1]) == NULL) {
 			make_channel(token[1]);
-			std::cout << "make channel\n";
 		}
 		clist[token[1]].adduser(fd, usrlist[fd]);
 		if (clist[token[1]].usrlist.size() == 1) {
@@ -133,7 +132,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		if (token[2][1] == '$') {
 			Client *receive_client = this->search_user(token[2].substr(2, token[2].size()));
 			if (receive_client == NULL) {
-				// Do not exsist client
+				// Does not exist client
 			}
 			int	receive_fd = receive_client->fd;
 			std::string send_message;
@@ -202,7 +201,40 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 	}
 	else if (token[0] == "MODE") { //채널모드설정
-
+		Channel *channel = this->search_channel(token[1]);
+		if (channel == NULL) {
+			// Does not exist channel
+		}
+		if (token.size() == 2) {
+			// View channel mode
+			std::string disp_mode;
+			std::string params;
+			for (std::set<char>::iterator iter = channel->getchannelmode().begin();
+				iter != channel->getchannelmode().end(); iter++) {
+				disp_mode += *iter;
+				if (*iter == 'k' || *iter == 'l') {
+					if (params.size() != 0) {
+						params += " ";
+					}
+					if (*iter == 'k') {
+						params += channel->getchannelpassword();
+					}
+					else {
+						params += channel->getusrlimits();
+					}
+				}
+			}
+			for (std::map<int,Client>::iterator iter = channel->usrlist.begin();
+			iter != channel->usrlist.end(); iter++) {
+				send_msg(RPL_MODE(this->usrlist[fd].getPrefix(), token[1], disp_mode, params), iter->first);
+			}
+			return ;
+		}
+		if (token[1][0] != '+' && token[1][0] != '-' && token[1].size() != 2) {
+			// Invalid mode
+		}
+		std::string mode;
+		channel->setchannelmode(mode);
 	}
 	else if (token[0] == "QUIT") { //다른 유저들한테 나갔다고 보냄
 		std::string quit_message = usrlist[fd].nickname + " :Quit\r\n";
@@ -233,7 +265,6 @@ void Server::make_channel(std::string channelname) {
 	Channel newchannel;
 
 	newchannel.setchannelname(channelname);
-
 	clist[channelname] = newchannel;
 }
 
