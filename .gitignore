@@ -2,3 +2,5 @@
 .DS_Store
 *.o
 ircserv
+a.out
+test*
