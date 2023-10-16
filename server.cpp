@@ -6,7 +6,7 @@
 #include <sstream>
 #include <utility>
 //10.11.3.2
-//irssi -c 10.28.4.4 -p 8080 -w 1234 -n juhyulee
+//irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
 
 void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
@@ -61,12 +61,9 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		usrlist[fd].pass += 1;
 	}
 	else if (token[0] == "USER") { //생성자로 대체
-		if (paramcnt == 1) {
+		if (paramcnt != 5) {
 			send_msg(ERR_NEEDMOREPARAMS(usrlist[fd].username, "USER"), fd);
 		}
-		// if () {
-		// 	send_msg(ERR_ALREADYREGISTRED("root"));
-		// }
 		usrlist[fd].username = token[1];
 		usrlist[fd].hostname = token[2];
 		usrlist[fd].servername = token[3];
@@ -82,6 +79,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	else if (token[0] == "JOIN") {
 		if (this->search_channel(token[1]) == NULL) {
 			make_channel(token[1]);
+			std::cout << "token: " << token[1] << std::endl;
 		}
 		clist[token[1]].adduser(fd, usrlist[fd]);
 		if (clist[token[1]].usrlist.size() == 1) {
@@ -190,14 +188,29 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 		invite_channel->adduser(invite_client->fd, *invite_client);
 	}
-	else if (token[0] == "TOPIC") { //채널 토픽 설정
-		if (token.size() == 1) {
+	else if (token[0] == "TOPIC") { //토픽 + 채널명 - 토픽띄움 / 토픽 + 채널명 + 변경토픽 - 토픽변경
+		std::map<int,Client> clients = this->clist[token[1]].usrlist;
+		if (token.size() == 2) { //토픽 띄움
+			//채널이 없으면 ERR_NOSUCHCHANNEL
+			//
 			std::string view_topic = this->search_channel(token[1])->getchanneltopic();
-			send_msg(view_topic, fd);
+			if (view_topic.empty())
+				send_msg(RPL_NOTOPIC(clist[token[1]].usrlist[fd].nickname,token[1]),fd);
+			else
+			{
+				send_msg(RPL_TOPIC(usrlist[fd].nickname,token[1],token[2]),fd);
+				send_msg(RPL_TOPICWHOTIME(usrlist[fd].nickname, token[1],usrlist[fd].nickname, "0"), fd);
+			}
 		}
-		else {
+		else if (token.size() == 3) { // 토픽 변경
+			//오퍼레이터 확인
 			Channel *target_channel = this->search_channel(token[1]);
 			target_channel->setchanneltopic(token[2]);
+			// 채널에 있는 모든 유저에게 broadcast
+			for (std::map<int,Client>::iterator iter = clients.begin();
+				iter != clients.end(); iter++) {
+				this->send_msg(RPL_MY_TOPIC(usrlist[fd].nickname, token[1], token[2]), iter->first);
+			}
 		}
 	}
 	else if (token[0] == "MODE") { //채널모드설정

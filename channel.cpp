@@ -3,6 +3,10 @@
 Channel::Channel() {
 	usrcnt = 0;
 	usrlimits = 3;
+	channeltopic = "";
+	channeloperator = "";
+	channelpassword = "";
+	channelname = "";
 }
 
 void Channel::adduser(int fd, Client client) {
