@@ -39,23 +39,23 @@ void Channel::inviteuser(int fd, Client client) {//채널에 유저 초대하는
 	adduser(fd,client);
 }
 
-std::string Channel::getchannelname() const {
+const std::string& Channel::getchannelname() const {
 	return this->channelname;
 }
 
-std::string Channel::getchannelpassword() const {
+const std::string& Channel::getchannelpassword() const {
 	return this->channelpassword;
 }
 
-std::string Channel::getchanneloperator() const {
+const std::string& Channel::getchanneloperator() const {
 	return this->channeloperator;
 }
 
-std::string Channel::getchanneltopic() const {
+const std::string& Channel::getchanneltopic() const {
 	return this->channeltopic;
 }
 
-std::set<char> Channel::getchannelmode() const {
+const std::set<char>& Channel::getchannelmode() const {
 	return this->channelmode;
 }
 

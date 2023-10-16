@@ -17,13 +17,15 @@ class Channel {
 		Channel();
 
 		std::map<int, Client> usrlist; //유저목록
-		std::string getchannelname() const;
-		std::string getchannelpassword() const;
-		std::string getchanneloperator() const;
-		std::string getchanneltopic() const;
-		std::set<char> getchannelmode() const;
+
+		const std::string& getchannelname() const;
+		const std::string& getchannelpassword() const;
+		const std::string& getchanneloperator() const;
+		const std::string& getchanneltopic() const;
+		const std::set<char>& getchannelmode() const;
 		int	getusrcnt() const;
 		int	getusrlimits() const;
+
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);

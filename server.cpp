@@ -210,12 +210,13 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 			std::string disp_mode;
 			std::string params;
 			for (std::set<char>::iterator iter = channel->getchannelmode().begin();
-				iter != channel->getchannelmode().end(); iter++) {
+			iter != channel->getchannelmode().end(); iter++) {
+				if (iter == channel->getchannelmode().begin() && iter != channel->getchannelmode().end()) {
+					disp_mode += "+";
+				}
 				disp_mode += *iter;
 				if (*iter == 'k' || *iter == 'l') {
-					if (params.size() != 0) {
-						params += " ";
-					}
+					params += " ";
 					if (*iter == 'k') {
 						params += channel->getchannelpassword();
 					}
