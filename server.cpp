@@ -5,6 +5,7 @@
 #include <set>
 #include <sstream>
 #include <utility>
+#include <vector>
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
@@ -244,11 +245,10 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 			}
 			return ;
 		}
-		if (token[1][0] != '+' && token[1][0] != '-' && token[1].size() != 2) {
+		if (token[2][0] != '+' && token[2][0] != '-' && token[2].size() != 2) {
 			// Invalid mode
 		}
-		std::string mode;
-		channel->setchannelmode(mode);
+		channel->setchannelmode(token);
 	}
 	else if (token[0] == "QUIT") { //다른 유저들한테 나갔다고 보냄
 		std::string quit_message = usrlist[fd].nickname + " :Quit\r\n";

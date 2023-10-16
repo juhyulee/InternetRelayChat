@@ -8,7 +8,7 @@ class Channel {
 	private :
 		std::string channelname; // 채널이름
 		std::string channelpassword; //채널비밀번호
-		std::string channeloperator; //채널오퍼레이터
+		std::vector<std::string> channeloperator; //채널오퍼레이터
 		std::string channeltopic; //채널토픽
 		std::set<char> channelmode; //채널모드
 		int usrcnt; //유저 인원수
@@ -30,7 +30,8 @@ class Channel {
 		void setchannelpassword(std::string password);
 		void setchanneloperator(std::string newoperator);
 		void setchanneltopic(std::string newtopic);
-		void setchannelmode(std::string mod);
+		void setchannelmode(std::vector<std::string> token);
+		void setusrlimits(int new_limits);
 		//특정 유저한테 보낼 메세지 서버로 보냄
 		//전체 유저한테 보낼 메세지 서버로 보냄
 
