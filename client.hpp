@@ -18,6 +18,7 @@ class Client {
 		std::string realname, int fd);
 
 		std::string getPrefix() const;
+		std::string getnickname() const;
 };
 
 #endif
