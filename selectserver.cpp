@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 					Client user;
 					server.usrlist[client_sock] = user;
 					FD_SET(client_sock, &reads);
-					if (fd_max << client_sock)
+					if (fd_max < client_sock) //???
 						fd_max = client_sock;
 					std::cout << "connected client :" << client_sock << std::endl;
 				}

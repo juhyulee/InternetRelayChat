@@ -9,6 +9,7 @@
 #include <vector>
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
+//irssi -c 10.12.1.7 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
 
 void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
@@ -45,6 +46,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 
 	while (iss >> word) {
 		token.push_back(word);
+		std::cout << "words :" << word << std::endl;
 		paramcnt += 1;
 	}
 	std::cout << "token: " << token[0] << std::endl;
@@ -117,7 +119,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		this->send_msg(RPL_ENDOFNAMES(clients[fd].nickname, token[1]), fd);
 	}
 	else if (token[0] == "PART") { //채널나가는명령어
-		for (int i = 1; i <= token.size(); i++) {
+		for (size_t i = 1; i <= token.size(); i++) {
 			Channel	targetChannel = this->clist[token[i]];
 			targetChannel.deleteuser(fd);
 			if (targetChannel.usrlist.size() == 0) {
@@ -128,7 +130,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	else if (token[0] == "NOTICE") {//메세지전송
 		Channel *target_channel = this->search_channel(token[1]);
 		std::string send_message;
-		for (int i = 0; i + 2 < token.size(); i++) {
+		for (size_t i = 0; i + 2 < token.size(); i++) {
 			if (i != 0) {
 				send_message += " ";
 			}
@@ -147,7 +149,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 			}
 			int	receive_fd = receive_client->fd;
 			std::string send_message;
-			for (int i = 0; i + 3 < token.size(); i++) {
+			for (size_t i = 0; i + 3 < token.size(); i++) {
 				if (i != 0) {
 					send_message += " ";
 				}
@@ -159,7 +161,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 		else {
 			std::string send_message;
-			for (int i = 0; i + 2 < token.size(); i++) {
+			for (size_t i = 0; i + 2 < token.size(); i++) {
 				if (i != 0) {
 					send_message += " ";
 				}
@@ -186,6 +188,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		}
 		kick_message << std::endl;
 		this->send_msg(kick_message.str(), target_user->fd);
+		//리플라이 + and 유저가 없는 유저 킥했을때 예?왜?처리
 	}
 	else if (token[0] == "INVITE") { //채널에 유저 초대
 		if (token.size() != 3) {
@@ -230,6 +233,7 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		Channel *channel = this->search_channel(token[1]);
 		if (channel == NULL) {
 			// Does not exist channel
+			return ;
 		}
 		if (token.size() == 2) {
 			// View channel mode
@@ -317,6 +321,7 @@ void Server::adduser(Client user, int fd) {
 }
 
 void Server::deluser(Client user, int fd) {
+	(void)user; ///???
 	usrlist.erase(usrlist.find(fd));
 }
 

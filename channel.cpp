@@ -5,6 +5,7 @@
 Channel::Channel() {
 	usrcnt = 0;
 	usrlimits = 3;
+	channelmode = std::set<char>();
 }
 
 void Channel::adduser(int fd, Client client) {
@@ -95,8 +96,9 @@ void Channel::setchanneltopic(std::string newtopic) {
 
 std::vector<std::string> *Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 	int switch_mode = 0;
+	(void)server;///???
 	std::set<char> channelmode = this->getchannelmode();
-	std::vector<std::string> *mode_params;
+	std::vector<std::string> *mode_params = new std::vector<std::string>;
 	if (token[2][0] == '+') {
 		switch_mode = 0;
 	}

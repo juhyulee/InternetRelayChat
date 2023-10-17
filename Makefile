@@ -5,13 +5,16 @@ SRCS_S = selectserver.cpp channel.cpp server.cpp client.cpp
 OBJS_S = $(SRCS_S:.cpp=.o)
 
 CXX = c++
-FLAGS = -Wall -Wextra -Werror -std=c++98
+FLAGS = -Wall -Wextra -Werror -std=c++98 -g
 RM = rm -rf
 
 all : 		$(SERVER)
 
 $(SERVER) :	$(OBJS_S)
 			$(CXX) $(FLAGS) -o $(SERVER) $(OBJS_S)
+
+%.o : %.cpp
+			$(CXX) $(FLAGS) -c $< -o $@
 
 clean :
 			$(RM) $(OBJS_S)
