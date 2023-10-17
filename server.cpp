@@ -1,4 +1,5 @@
 #include "server.hpp"
+#include "message.h"
 #include "util.h"
 #include <iterator>
 #include <ostream>
@@ -14,14 +15,14 @@ void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
 	send(fd, msg.c_str(), msg.size(), 0);
 }
 
-// void Channel::broadcastChannelMessage(std::string message, int send_fd) {
-// 	for (std::map<int,Client>::iterator iter = this->usrlist.begin();
-// 	iter != this->usrlist.end(); iter++) {
-// 		if (iter->first != send_fd) {
-// 			send_msg(message, iter->first);
-// 		}
-// 	}
-// }
+void Server::broadcastChannelMessage(std::string message, int send_fd) {
+	for (std::map<int,Client>::iterator iter = this->usrlist.begin();
+	iter != this->usrlist.end(); iter++) {
+		if (iter->first != send_fd) {
+			send_msg(message, iter->first);
+		}
+	}
+}
 
 void Server::read_msg(std::string msg, int fd) { // 메세지 읽는 함수
 	std::vector<std::string> token;
@@ -259,7 +260,9 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 		if (token[2][0] != '+' && token[2][0] != '-' && token[2].size() != 2) {
 			// Invalid mode
 		}
-		channel->setchannelmode(*this, token);
+		std::vector<std::string> *mode_params = channel->setchannelmode(*this, token);
+		if (mode_params)
+			broadcastChannelMessage(RPL_CHANNELMODEIS(this->usrlist[fd].getPrefix(), channel->getchannelname(), *mode_params[0].data(), *mode_params[1].data()), fd);
 	}
 	else if (token[0] == "QUIT") { //다른 유저들한테 나갔다고 보냄
 		std::string quit_message = usrlist[fd].nickname + " :Quit\r\n";
@@ -298,7 +301,7 @@ Channel *Server::search_channel(std::string channelname) {
 		if (iter->second.getchannelname() == channelname)
 		return &iter->second;
 	}
-	return NULL;
+	return 0;
 }
 
 Client *Server::search_user(std::string nickname) {
@@ -306,7 +309,7 @@ Client *Server::search_user(std::string nickname) {
 		if (iter->second.nickname == nickname)
 		return &iter->second;
 	}
-	return NULL;
+	return 0;
 }
 
 void Server::adduser(Client user, int fd) {

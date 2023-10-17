@@ -34,7 +34,7 @@ class Channel {
 		void addchanneloperator(Client newoperator);
 		void removechanneloperator(Client newoperator);
 		void setchanneltopic(std::string newtopic);
-		void setchannelmode(Server &server, std::vector<std::string> token);
+		std::vector<std::string> *setchannelmode(Server &server, std::vector<std::string> token);
 		void setusrlimits(int new_limits);
 		//특정 유저한테 보낼 메세지 서버로 보냄
 		//전체 유저한테 보낼 메세지 서버로 보냄

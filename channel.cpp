@@ -93,10 +93,10 @@ void Channel::setchanneltopic(std::string newtopic) {
 	this->channeltopic = newtopic;
 }
 
-void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
+std::vector<std::string> *Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 	int switch_mode = 0;
 	std::set<char> channelmode = this->getchannelmode();
-	std::vector<std::string> mode_params;
+	std::vector<std::string> *mode_params;
 	if (token[2][0] == '+') {
 		switch_mode = 0;
 	}
@@ -109,19 +109,19 @@ void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 		if (switch_mode == 0) {
 			if (channelmode.find(token[2][1]) == channelmode.end()) {
 				channelmode.insert(token[2][1]);
-				mode_params.push_back(token[2]);
+				mode_params->push_back(token[2]);
 			}
 			else {
-				return ;
+				return 0;
 			}
 		}
 		else if (switch_mode == 1) {
 			if (channelmode.find(token[2][1]) != channelmode.end()) {
 				channelmode.erase(token[2][1]);
-				mode_params.push_back(token[2]);
+				mode_params->push_back(token[2]);
 			}
 			else {
-				return ;
+				return 0;
 			}
 		}
 	}
@@ -130,7 +130,7 @@ void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 	// 채널 유저 수 제한 (l)
 	else if (token[2][1] == 'k' || token[2][1] == 'o' || token[2][1] == 'l') {
 		if (token.size() < 4) {
-			return ;
+			return 0;
 		}
 		if (switch_mode == 0) {
 			if (token[2][1] == 'o') {
@@ -138,11 +138,11 @@ void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 				if (channeloperator.find(token[3]) == channeloperator.end()) {
 					Client *newoperator = this->search_user(token[3]);
 					this->addchanneloperator(*newoperator);
-					mode_params.push_back(token[2]);
-					mode_params.push_back(token[3]);
+					mode_params->push_back(token[2]);
+					mode_params->push_back(token[3]);
 				}
 				else {
-					return ;
+					return 0;
 				}
 			}
 			else if (channelmode.find(token[2][1]) == channelmode.end()) {
@@ -155,11 +155,11 @@ void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 					this->setusrlimits(std::atoi(token[3].c_str()));
 				}
 				// reply 목록(command, parameter) 저장
-				mode_params.push_back(token[2]);
-				mode_params.push_back(token[3]);
+				mode_params->push_back(token[2]);
+				mode_params->push_back(token[3]);
 			}
 			else {
-				return ;
+				return 0;
 			}
 		}
 		else if (switch_mode == 1) {
@@ -168,11 +168,11 @@ void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 				if (channeloperator.find(token[3]) != channeloperator.end()) {
 					Client *newoperator = search_user(token[3]);
 					this->removechanneloperator(*newoperator);
-					mode_params.push_back(token[2]);
-					mode_params.push_back(token[3]);
+					mode_params->push_back(token[2]);
+					mode_params->push_back(token[3]);
 				}
 				else {
-					return ;
+					return 0;
 				}
 			}
 			else if (channelmode.find(token[2][1]) != channelmode.end()) {
@@ -185,21 +185,22 @@ void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 					setusrlimits(100);
 				}
 				// reply 목록(command) 저장
-				mode_params.push_back(token[2]);
+				mode_params->push_back(token[2]);
 			}
 			else {
-				return ;
+				return 0;
 			}
 		}
 	}
 	else {
-		return ;
+		return 0;
 	}
+	return mode_params;
 	// RPL_CHANNELMODE
-	for (std::map<int,Client>::iterator iter = this->usrlist.begin();
-	iter != this->usrlist.end(); iter++) {
+	// for (std::map<int,Client>::iterator iter = this->usrlist.begin();
+	// iter != this->usrlist.end(); iter++) {
 		// send_msg(RPL_MODE(this->usrlist[fd].getPrefix(), token[1], mode_params.at(0), mode_params.at(1)), iter->first);
-	}
+	// }
 }
 //특정 유저한테 보낼 메세지 서버로 보냄
 //전체 유저한테 보낼 메세지 서버로 보냄
