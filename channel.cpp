@@ -77,6 +77,10 @@ void Channel::setchannelpassword(std::string password) {
 	this->channelpassword = password;
 }
 
+void Channel::deletechannelpassword() {
+	this->channelpassword.erase();
+}
+
 void Channel::addchanneloperator(Client newoperator) {
 	this->channeloperator.insert(make_pair(newoperator.getnickname(), newoperator));
 }
@@ -173,9 +177,9 @@ void Channel::setchannelmode(Server &server, std::vector<std::string> token) {
 			}
 			else if (channelmode.find(token[2][1]) != channelmode.end()) {
 				channelmode.erase(token[2][1]);
-				// parameter 제거
+				// parameter 초기화
 				if (token[2][1] == 'k') {
-					setchannelpassword("");
+					deletechannelpassword();
 				}
 				else if (token[2][1] == 'l') {
 					setusrlimits(100);

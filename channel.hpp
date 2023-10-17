@@ -30,6 +30,7 @@ class Channel {
 
 		void setchannelname(std::string chanellname);
 		void setchannelpassword(std::string password);
+		void deletechannelpassword();
 		void addchanneloperator(Client newoperator);
 		void removechanneloperator(Client newoperator);
 		void setchanneltopic(std::string newtopic);
