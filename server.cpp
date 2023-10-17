@@ -19,9 +19,7 @@ void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
 void Server::broadcastChannelMessage(std::string message, int send_fd) {
 	for (std::map<int,Client>::iterator iter = this->usrlist.begin();
 	iter != this->usrlist.end(); iter++) {
-		if (iter->first != send_fd) {
-			send_msg(message, iter->first);
-		}
+		send_msg(message, iter->first);
 	}
 }
 
@@ -255,18 +253,22 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 					}
 				}
 			}
-			for (std::map<int,Client>::iterator iter = channel->usrlist.begin();
-			iter != channel->usrlist.end(); iter++) {
-				send_msg(RPL_MODE(this->usrlist[fd].getPrefix(), token[1], disp_mode, params), iter->first);
-			}
+			broadcastChannelMessage(RPL_CHANNELMODEIS(this->usrlist[fd].getPrefix(), token[1], disp_mode, params), fd);
+			// broadcastChannelMessage(RPL_CHANNELMODEIS(this->usrlist[fd].getPrefix(), token[1], disp_mode, params));
+			// for (std::map<int,Client>::iterator iter = channel->usrlist.begin();
+			// iter != channel->usrlist.end(); iter++) {
+				// send_msg(RPL_MODE(this->usrlist[fd].getPrefix(), token[1], disp_mode, params), iter->first);
+			// }
 			return ;
 		}
 		if (token[2][0] != '+' && token[2][0] != '-' && token[2].size() != 2) {
-			// Invalid mode
+			return ;
 		}
 		std::vector<std::string> *mode_params = channel->setchannelmode(*this, token);
-		if (mode_params)
-			broadcastChannelMessage(RPL_CHANNELMODEIS(this->usrlist[fd].getPrefix(), channel->getchannelname(), *mode_params[0].data(), *mode_params[1].data()), fd);
+		if (mode_params) {
+			broadcastChannelMessage(RPL_MODE(this->usrlist[fd].getPrefix(), channel->getchannelname(), *mode_params[0].data(), *mode_params[1].data()), fd);
+			// broadcastChannelMessage(RPL_MODE(this->usrlist[fd].getPrefix(), channel->getchannelname(), *mode_params[0].data(), *mode_params[1].data()));
+		}
 	}
 	else if (token[0] == "QUIT") { //다른 유저들한테 나갔다고 보냄
 		std::string quit_message = usrlist[fd].nickname + " :Quit\r\n";
