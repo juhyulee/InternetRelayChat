@@ -6,7 +6,7 @@
 class Server {
 	private :
 	public :
-		std::string servername; //ㅓ버이름
+		std::string servername; //서버이름
 		std::map<std::string, Channel> clist; //채널목록
 		std::map<int, Client> usrlist; //유저목록
 
