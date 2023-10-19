@@ -1,5 +1,8 @@
 #include "util.h"
 #include "server.hpp"
+#include <iostream>
+#include <map>
+
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
 //irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
@@ -10,19 +13,59 @@ Server::Server() {}
 Server::~Server() {}
 
 const std::string& Server::getServerName() const {
-	return this->_server_name;
+	return _server_name;
 }
 
-const std::map<std::string, Channel>& Server::getChannelList() const {
-	return this->_channel_list;
+const std::map<std::string, Channel *>& Server::getChannelList() const {
+	return _channel_list;
 }
 
-const std::map<int, Client>& Server::getUserList() const {
-	return this->_user_list;
+const std::map<int, Client *>& Server::getUserList() const {
+	return _user_list;
 }
 
 const std::string& Server::getServerPassword() const {
-	return this->_server_password;
+	return _server_password;
+}
+
+void Server::setServerName(const std::string& server_name) {
+	_server_name = server_name;
+}
+
+void Server::addChannelList(const std::string& channel_name, Channel *channel) {
+	_channel_list.insert(std::make_pair(channel_name, channel));
+}
+
+void Server::deleteChannelList(const std::string& channel_name) {
+	_channel_list.erase(channel_name);
+}
+
+void Server::addUserList(int client_fd, Client *client) {
+	_user_list.insert(std::make_pair(client_fd, client));
+}
+
+void Server::deleteUserList(int client_fd) {
+	_user_list.erase(client_fd);
+}
+
+void Server::setServerPassword(const std::string& server_password) {
+	_server_password = server_password;
+}
+
+void Server::noticeChannelMessage(std::string message, int socket_fd) {
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+		iter != _user_list.end(); ++iter) {
+		sendMessage(message, iter->second->getSocketFd());
+	}
+}
+
+void Server::broadcastChannelMessage(std::string message, int socket_fd) {
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+		iter != _user_list.end(); ++iter) {
+		if (iter->first != socket_fd) {
+			sendMessage(message, iter->second->getSocketFd());
+		}
+	}
 }
 
 void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
