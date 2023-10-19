@@ -2,7 +2,7 @@
 # define SERVER_HPP
 
 # include "util.h"
-# include "Channel.hpp"
+//# include "Channel.hpp"
 
 class Server {
 	private :

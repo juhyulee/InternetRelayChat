@@ -1,7 +1,7 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-// #include "client.hpp"
+#include "Client.hpp"
 #include <set>
 #include <cstdlib>
 #include <vector>
@@ -49,7 +49,7 @@ class Channel {
 		void  						setChannelTopic(std::string new_topic);
 		std::vector<std::string>	*setChannelMode(Server &server, std::vector<std::string> token);
 		void 						setUserLimit(int new_limits);
-		
+
 		//msg
 		void 						broadcastChannelMessage(int send_fd, std::string message);// 채널에 메세지 보내는 함수
 		// ^^^ send_fd == -1 자기자신 포함, 유저일 때는 비포함

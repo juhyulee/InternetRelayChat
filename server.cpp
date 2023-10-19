@@ -5,6 +5,9 @@
 //irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
 
+Server::Server() {}
+
+Server::~Server() {}
 
 void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
 int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {
@@ -139,19 +142,29 @@ void Server::sendMessage(std::string message, int fd) { //메세지 보내는 �
 }
 
 void Server::parsingData(std::string message, int fd) { //읽음
-	std::string temp_buffer;
 	std::vector<std::string> token;
-	std::istringstream iss(message);
 	size_t pos = 0;
+	std::string line;
 
 	while (1) {
-		std::string line;
 
-		if (temp_buffer.find("\r\n") != std::string::npos) {
-			pos = temp_buffer.find("\r\n");
-			line = temp_buffer.substr(0, pos + 1);
+		if (message.find("\r\n") != std::string::npos) {
+			pos = message.find("\r\n");
+			line = message.substr(0, pos + 1);
 			std::cout << "line : " << line << std::endl;
 			break;
 		}
+		else {
+			_clients[fd] + message;
+		}
 	}
+	std::istringstream input_str(line);
+	std::string word;
+
+	while(input_str >> word) {
+		token.push_back(word);
+		std::cout << "words :" << word << std::endl;
+	}
+
+
 }

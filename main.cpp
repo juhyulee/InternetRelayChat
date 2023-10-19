@@ -1,5 +1,5 @@
 #include "util.h"
-#include "server.hpp"
+#include "Server.hpp"
 
 // void exit_with_perror(const std::string& msg) {
 // 	std::cerr << msg << std::endl;
