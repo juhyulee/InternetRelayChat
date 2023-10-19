@@ -13,6 +13,7 @@ class Server {
 		struct kevent _event_list[8];
 		int _new_events;
 		struct kevent* _curr_event;
+		//============================서버구동부 건들지 마시오===================================
 		std::map<int, std::string> _send_data; //전송할 데이터
 		std::map<int, std::string> _recv_data; //읽은 데이터
 

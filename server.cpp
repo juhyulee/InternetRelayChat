@@ -23,6 +23,7 @@ void Server::disconnectClient(int client_fd, std::map<int, std::string>& clients
 void Server::serverInit(int argc, char **argv) {
 
 	(void)argc;
+	_server_password = argv[2];
 	if ((_server_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
 		std::cout << "socket error" << std::endl;
 		exit(0);
@@ -138,6 +139,20 @@ void Server::sendMessage(std::string message, int fd) { //메세지 보내는 �
 }
 
 void Server::parsingData(std::string message) { //읽음
-	std::cout <<  "parsed msg : "<< message << std::endl;
-	sendMessage("001 juhyulee :Welcome to the ircbal network juhyulee! \r\n", 5);
+	std::string temp_buffer;
+
+	size_t pos = 0;
+
+	while (1) {
+		std::string line;
+
+		if (temp_buffer.find("\r\n") != std::string::npos) {
+			pos = temp_buffer.find("\r\n");
+			line = temp_buffer.substr(0, pos + 1);
+			std::cout << "line : " << line << std::endl;
+		}
+		else {
+			break;
+		}
+	}
 }
