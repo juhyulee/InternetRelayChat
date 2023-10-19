@@ -21,6 +21,8 @@ class Server {
 		void disconnectClient(int client_fd, std::map<int, std::string>& clients);
 		void parsingData(std::string message);
 		void sendMessage(std::string message, int fd); //메세지 보내는 함수
+
+		void pong(void);
 };
 //메세지 보내는 함수
 //메세지 받는 함수
