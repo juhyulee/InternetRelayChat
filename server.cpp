@@ -104,7 +104,7 @@ void Server::serverInit(int argc, char **argv) {
 						buf[n] = '\0';
 						_clients[_curr_event->ident] += buf;
 						// std::cout << "received data from " << curr_event->ident << ": " << clients[curr_event->ident] << std::endl;
-						parsingData(_clients[_curr_event->ident]);
+						parsingData(_clients[_curr_event->ident],_curr_event->ident);
 						if (!_send_data[_curr_event->ident].empty()) {
 							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, _curr_event->udata);
 							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
@@ -138,9 +138,10 @@ void Server::sendMessage(std::string message, int fd) { //메세지 보내는 �
 	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
 }
 
-void Server::parsingData(std::string message) { //읽음
+void Server::parsingData(std::string message, int fd) { //읽음
 	std::string temp_buffer;
-
+	std::vector<std::string> token;
+	std::istringstream iss(message);
 	size_t pos = 0;
 
 	while (1) {
@@ -150,8 +151,6 @@ void Server::parsingData(std::string message) { //읽음
 			pos = temp_buffer.find("\r\n");
 			line = temp_buffer.substr(0, pos + 1);
 			std::cout << "line : " << line << std::endl;
-		}
-		else {
 			break;
 		}
 	}
