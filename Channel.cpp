@@ -12,6 +12,8 @@ Channel::Channel(std::string name) {
 	this->_name = name;
 };
 
+Channel::Channel(const Channel& copy) {}
+
 Channel::Channel(std::string name, Client & new_user){
 	this->initialize();
 	this->_name = name;
