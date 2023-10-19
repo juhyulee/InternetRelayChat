@@ -41,6 +41,7 @@ class Server {
 		void parsingData(std::string message);
 
 		void pong(void);
+		void commandJoin(std::vector<std::string> token, int paramcnt, int fd);
 
 		private :
 			int _server_socket;
