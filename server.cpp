@@ -9,7 +9,7 @@
 #include <vector>
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
-//irssi -c 10.12.1.7 -p 8080 -w 1234 -n juhyulee
+//irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
 
 void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
@@ -178,14 +178,19 @@ void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함
 	else if (token[0] == "KICK") { //채널 방출
 		Channel *target_channel = this->search_channel(token[1]);
 		Client *target_user = target_channel->search_user(token[2]);
-		target_channel->deleteuser(target_user->fd);
-		std::stringstream kick_message;
-		kick_message << target_channel->getchannelname() << ". kicked from the channel.";
-		if (token.size() < 3) {
-			kick_message << " : " << token[3];
+		if (!target_user) {
+			//아무도 없없다다고  리리플플라라이
+			return ;
 		}
-		kick_message << std::endl;
-		this->send_msg(kick_message.str(), target_user->fd);
+		target_channel->deleteuser(target_user->fd);
+		// std::stringstream kick_message;
+		// kick_message << target_channel->getchannelname() << ". kicked from the channel.";
+		// if (token.size() < 3) {
+		// 	kick_message << " : " << token[3];
+		// }
+		// kick_message << std::endl;
+		this->broadcastChannelMessage(RPL_KICK(target_user->username,target_channel->getchannelname(),target_user->nickname),fd);
+		// this->send_msg(kick_message.str(), target_user->fd);
 		//리플라이 + and 유저가 없는 유저 킥했을때 예?왜?처리
 	}
 	else if (token[0] == "INVITE") { //채널에 유저 초대
