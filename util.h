@@ -17,8 +17,15 @@
 #include <vector>
 
 #include "message.h"
-#include "client.hpp"
+// #include "client.hpp"
 #include "server.hpp"
-#include "channel.hpp"
+// #include "channel.hpp"
+
+#include <set>
+#include <iterator>
+#include <ostream>
+#include <sstream>
+#include <utility>
+
 
 #endif

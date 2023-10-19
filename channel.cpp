@@ -1,4 +1,4 @@
-#include "server.hpp"
+#include "channel.hpp"
 
 //-------------------------------------------------------------------------------->>
 //oxodox
@@ -13,7 +13,7 @@ void 	Channel::initChannel(){
 	this->_user_limit = 3;
 	this->_user_list = std::map<int, Client>();
 	this->_user_invite_list = std::map<int, Client>();
-}
+};
 
 Channel::Channel() {
 	this->initChannel();
