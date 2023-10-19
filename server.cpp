@@ -5,6 +5,9 @@
 //irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
 
+Server::Server() {}
+
+Server::~Server() {}
 
 void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
 int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {
@@ -23,6 +26,7 @@ void Server::disconnectClient(int client_fd, std::map<int, std::string>& clients
 void Server::serverInit(int argc, char **argv) {
 
 	(void)argc;
+	_server_password = argv[2];
 	if ((_server_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
 		std::cout << "socket error" << std::endl;
 		exit(0);
@@ -103,7 +107,7 @@ void Server::serverInit(int argc, char **argv) {
 						buf[n] = '\0';
 						_clients[_curr_event->ident] += buf;
 						// std::cout << "received data from " << curr_event->ident << ": " << clients[curr_event->ident] << std::endl;
-						parsingData(_clients[_curr_event->ident]);
+						parsingData(_clients[_curr_event->ident],_curr_event->ident);
 						if (!_send_data[_curr_event->ident].empty()) {
 							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, _curr_event->udata);
 							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
@@ -137,7 +141,30 @@ void Server::sendMessage(std::string message, int fd) { //메세지 보내는 �
 	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
 }
 
-void Server::parsingData(std::string message) { //읽음
-	std::cout <<  "parsed msg : "<< message << std::endl;
-	sendMessage("001 juhyulee :Welcome to the ircbal network juhyulee! \r\n", 5);
+void Server::parsingData(std::string message, int fd) { //읽음
+	std::vector<std::string> token;
+	size_t pos = 0;
+	std::string line;
+
+	while (1) {
+
+		if (message.find("\r\n") != std::string::npos) {
+			pos = message.find("\r\n");
+			line = message.substr(0, pos + 1);
+			std::cout << "line : " << line << std::endl;
+			break;
+		}
+		else {
+			_clients[fd] + message;
+		}
+	}
+	std::istringstream input_str(line);
+	std::string word;
+
+	while(input_str >> word) {
+		token.push_back(word);
+		std::cout << "words :" << word << std::endl;
+	}
+
+
 }

@@ -2,7 +2,7 @@
 # define SERVER_HPP
 
 # include "util.h"
-# include "Channel.hpp"
+//# include "Channel.hpp"
 
 class Server {
 	private :
@@ -13,6 +13,7 @@ class Server {
 		struct kevent _event_list[8];
 		int _new_events;
 		struct kevent* _curr_event;
+		//============================서버구동부 건들지 마시오===================================
 		std::map<int, std::string> _send_data; //전송할 데이터
 		std::map<int, std::string> _recv_data; //읽은 데이터
 
@@ -57,7 +58,9 @@ class Server {
 		void changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
 		int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata);
 		void disconnectClient(int client_fd, std::map<int, std::string>& clients);
-		void parsingData(std::string message);
+		void parsingData(std::string message, int fd);
+
+		void pong(void);
 
 		void commandJoin(std::vector<std::string> token, int paramcnt, int fd);
 };

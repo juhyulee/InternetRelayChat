@@ -1,4 +1,4 @@
-#include "channel.hpp"
+#include "Channel.hpp"
 
 //-------------------------------------------------------------------------------->>
 //oxodox
@@ -27,7 +27,7 @@ Channel::Channel(std::string name) {
 Channel::Channel(std::string name, Client & new_user){
 	this->initChannel();
 	this->_name = name;
-	this->_operator.insert(std::make_pair(new_user.getFd(), new_user.getNickname())); 
+	this->_operator.insert(std::make_pair(new_user.getFd(), new_user.getNickname()));
 	//getFd getNickname 아직 없음
 };
 
@@ -243,7 +243,7 @@ Client *	Channel::searchChannelUser(std::string nickname){ // 유저 목록에 �
 			return (iter->second);
 	}
 	return (NULL);
-}; 
+};
 Client *	Channel::searchChannelInvite(std::string nickname){  // 초대되었는지 확인
 	for (std::map<int, Client>::iterator iter = this->_user_invite_list.begin(); \
 	iter != this->_user_invite_list.end(); iter++){

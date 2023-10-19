@@ -1,6 +1,6 @@
 SERVER = ircserv
 
-SRCS_S = main.cpp server.cpp
+SRCS_S = main.cpp Server.cpp Client.cpp
 
 OBJS_S = $(SRCS_S:.cpp=.o)
 
