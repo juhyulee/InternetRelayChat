@@ -18,7 +18,7 @@
 
 #include "message.h"
 // #include "client.hpp"
-#include "server.hpp"
+// #include "server.hpp"
 // #include "channel.hpp"
 
 #include <set>

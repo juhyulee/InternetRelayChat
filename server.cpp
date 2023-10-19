@@ -1,4 +1,5 @@
 #include "util.h"
+#include "Server.hpp"
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
 //irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
