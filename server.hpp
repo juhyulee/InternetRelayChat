@@ -35,7 +35,7 @@ class Server {
 		const std::string& getServerPassword() const;									//서버비밀번호 가져오는 함수
 
 		void setServerName(const std::string& server_name);								//서버이름 설정하는 함수
-		void addChanelList(const std::string& channel_name, const Channel& channel);		//채널목록에 채널 추가하는 함수
+		void addChannelList(const std::string& channel_name, const Channel& channel);		//채널목록에 채널 추가하는 함수
 		void deleteChannelList(const std::string& channel_name);							//채널목록에서 채널 삭제하는 함수
 		void addUserList(int fd, const Client& user);									//유저목록에 유저 추가하는 함수
 		void deleteUserList(int fd);													//유저목록에서 유저 삭제하는 함수

@@ -68,6 +68,11 @@ class Channel {
 		void 						addChannelUser(int fd, Client client); //유저 채널에 추가하는 함수
 		void 						deleteChannelUser(int fd);//유저 usrlist에서 지우는 함수
 		void 						inviteChannelUser(int fd, Client client);//채널에 유저 초대하는 함수
+
+		//check
+		int 						checkPassword();
+		int 						checkUserLimit() ;
+		int 						checkInvite(int fd);
 };
 
 #endif
