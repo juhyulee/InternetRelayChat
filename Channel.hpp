@@ -15,7 +15,7 @@ class Channel {
 	private :
 		std::string _name; // 채널이름
 		std::string _password; //채널비밀번호
-		std::map<std::string, Client> _operator; //채널오퍼레이터
+		std::map<std::string, Client> _operator;//채널오퍼레이터
 		std::string _topic; //채널토픽
 		std::set<char> _mode; //채널모드
 		int _user_cnt; //유저 인원수
