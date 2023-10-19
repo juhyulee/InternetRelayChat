@@ -2,7 +2,8 @@
 # define SERVER_HPP
 
 # include "util.h"
-//# include "Channel.hpp"
+# include "Channel.hpp"
+# include "Client.hpp"
 
 
 class Server {

@@ -7,8 +7,23 @@
 
 Server::Server() {}
 
-
 Server::~Server() {}
+
+const std::string& Server::getServerName() const {
+	return this->_server_name;
+}
+
+const std::map<std::string, Channel>& Server::getChannelList() const {
+	return this->_channel_list;
+}
+
+const std::map<int, Client>& Server::getUserList() const {
+	return this->_user_list;
+}
+
+const std::string& Server::getServerPassword() const {
+	return this->_server_password;
+}
 
 void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
 int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {

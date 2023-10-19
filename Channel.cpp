@@ -1,8 +1,31 @@
 #include "Channel.hpp"
+
+// -------------------------------------------------------------------------------->>
+// Orthodox Canonical Form
+// -------------------------------------------------------------------------------->>
+Channel::Channel() {
+	this->initialize();
+}
+
+Channel::Channel(std::string name) {
+	this->initialize();
+	this->_name = name;
+};
+
+Channel::Channel(std::string name, Client & new_user){
+	this->initialize();
+	this->_name = name;
+	this->_operator.insert(std::make_pair(new_user.getFd(), new_user.getNickname()));
+	//getFd getNickname 아직 없음
+};
+
+Channel::~Channel(){};
+
 //-------------------------------------------------------------------------------->>
-//oxodox
+//initialize
 //-------------------------------------------------------------------------------->>
-void 	Channel::initChannel(){
+
+void	Channel::initialize(){
 	this->_name = "default";
 	this->_password = "";
 	this->_operator = std::map<std::string, Client> ();
@@ -13,25 +36,6 @@ void 	Channel::initChannel(){
 	this->_user_list = std::map<int, Client>();
 	this->_user_invite_list = std::map<int, Client>();
 };
-
-Channel::Channel() {
-	this->initChannel();
-}
-
-Channel::Channel(std::string name) {
-	this->initChannel();
-	this->_name = name;
-};
-
-Channel::Channel(std::string name, Client & new_user){
-	this->initChannel();
-	this->_name = name;
-	this->_operator.insert(std::make_pair(new_user.getFd(), new_user.getNickname()));
-	//getFd getNickname 아직 없음
-};
-
-Channel::~Channel(){};
-
 
 
 //-------------------------------------------------------------------------------->>

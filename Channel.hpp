@@ -25,7 +25,7 @@ class Channel {
 
 		Channel(const Channel & copy);
 		const Channel & operator=(const Channel & assign);
-		void	initChannel();
+		void	initialize();
 
 	public :
 		Channel();
