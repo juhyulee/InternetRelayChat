@@ -14,13 +14,13 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, int fd){
 	//------------------------------------------------------error::no channel name
 	if (paramcnt < 1)
 	{
-		//ERR_NEEDMOREPARAMS
+		this->sendMessage(ERR_NEEDMOREPARAMS(user.getNickname(), "JOIN"), fd);
 		return ;
 	}
 	//------------------------------------------------------error::client exceed max channel cnt
 	if (user.checkChannelLimit() == -1)
 	{
-		//ERR_TOOMANYCHANNELS
+		this->sendMessage(ERR_TOOMANYCHANNELS(user.getNickname(), "JOIN"), fd);
 		return ;
 	}
 	//------------------------------------------------------success::new channel
@@ -47,11 +47,9 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, int fd){
 	}
 	if (ch->checkPassword(password) == -1){
 		this->sendMessage(ERR_BADCHANNELKEY(user.getNickname(), token[1]), fd);
-		//ERR_BADCHANNELKEY
 	}
 	if (ch->checkBanned(user) == -1){
 		this->sendMessage(ERR_BANNEDFROMCHAN(user.getNickname(), token[1]), fd);
-		//ERR_BANNEDFROMCHAN
 	}
 	//------------------------------------------------------Success::
 	else {
@@ -60,9 +58,13 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, int fd){
 		//위 fd map으로 바꿔야 함...
 		if (ch->getChannelTopic() != NULL){
 			//RPL_TOPIC
-			//RPL_TOPICWHOTIME
+			this->sendMessage(RPL_TOPIC(user.getNickname(), token[1], ch->getChannelTopic()), fd);
+			// this->sendMessage(RPL_TOPICWHOTIME(user.getNickname(), token[1], ch->getChannelTopic()), fd);
+			//RPL_TOPICWHOTIME 마지막 값이 타임스탬프... https://modern.ircdocs.horse/#rpltopic-333
 		}
-		//RPL_NAMREPLY
+		this->sendMessage(RPL_NAMREPLY(user.getNickname(), ch->getSymbol(), token[1], user.getPrefix()), fd);
+		//RPL_NAMREPLY :: 어케하누
+		this->broadcastChannelMessage(RPL_ENDOFNAMES(user.getNickname(), token[1]), fd);
 		//RPL_ENDOFNAMES
 	}
 
