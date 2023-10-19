@@ -9,7 +9,7 @@ class Server {
 		std::string servername; //서버이름
 		std::map<std::string, Channel> clist; //채널목록
 		std::map<int, Client> usrlist; //유저목록
-
+		std::map<int, std::string> send_data; //전송할 데이터
 		std::string serverpassword; //서버비밀번호
 		void read_msg(std::string msg, int fd); //메세지 받는 함수
 		void send_msg(std::string msg, int fd); //메세지 보내는 함수
@@ -22,6 +22,7 @@ class Server {
 		void deluser(Client user, int fd); //서버에서 유저 삭제
 		void checkuserinformation(Client& user);
 		void delchannel(std::string channelname);
+		void parsedate(Client &client)
 };
 //메세지 보내는 함수
 //메세지 받는 함수

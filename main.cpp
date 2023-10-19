@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include "util.h"
 
 void exit_with_perror(const std::string& msg) {
 	std::cerr << msg << std::endl;
@@ -33,6 +34,7 @@ void disconnect_client(int client_fd, std::map<int, std::string>& clients) {
 int main(int argc, char **argv) {
 	int server_socket;
 	struct sockaddr_in server_addr;
+	Server	server;
 
 	std::cout << argc << argv[1] << argv[2] << std::endl;
 	if ((server_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
@@ -112,24 +114,37 @@ int main(int argc, char **argv) {
 						buf[n] = '\0';
 						clients[curr_event->ident] += buf;
 						std::cout << "received data from " << curr_event->ident << ": " << clients[curr_event->ident] << std::endl;
+						// parsedata(clients[curr_event->ident]);
+						if (!server.send_data[curr_event->ident].empty()) {
+							change_events(change_list, curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, curr_event->udata);
+							change_events(change_list, curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, curr_event->udata);
+						}
 					}
 				}
 			}
 			else if (curr_event->filter == EVFILT_WRITE) {
 				std::map<int, std::string>::iterator it = clients.find(curr_event->ident);
 				if (it != clients.end()) {
-					if (clients[curr_event->ident] != "") {
+					if (!server.send_data[curr_event->ident].empty()) {//ㄴㅐ가 보보내내는는거
 						int n;
+						std::cout << "send data from" << curr_event->ident << ": " << server.send_data[curr_event->ident] << std::endl;
 						if ((n = send(curr_event->ident, clients[curr_event->ident].c_str(), clients[curr_event->ident].size(), 0) == -1)) {
 							std::cerr << "client write error!" << std::endl;
 							disconnect_client(curr_event->ident, clients);
 						}
 						else
 							clients[curr_event->ident].clear();
+							change_events(change_list, curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, curr_event->udata);
+							change_events(change_list, curr_event->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, curr_event->udata);
 					}
 				}
 			}
 		}
 	}
 	return (0);
+}
+
+
+void send_msg(std::string msg, int fd) {
+	change_events(change_list, curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, curr_event->udata);
 }

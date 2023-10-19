@@ -1,3 +1,13 @@
+규약
+멤버변수 - 앞에 _로시작 예시 _name
+변수 - 스네이크 케이스 hello_world
+함수 - lower camel case  searchUser
+클래스 - 어퍼카멜케이스 ChannlUser
+
+주휴리 - server,pong,quit,buffer
+시우리 - join,part,privmsg,topic
+영고 - pass,nick,user,mode,kick,invite
+
 <message>  ::= [':' <prefix> <SPACE> ] <command> <params> <crlf>
 <prefix>   ::= <servername> | <nick> [ '!' <user> ] [ '@' <host> ]
 <command>  ::= <letter> { <letter> } | <number> <number> <number>
