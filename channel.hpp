@@ -1,7 +1,7 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include "client.hpp"
+// #include "client.hpp"
 #include <set>
 #include <cstdlib>
 #include <vector>
@@ -9,6 +9,7 @@
 #include <iostream>
 
 class Server;
+class Client;
 
 class Channel {
 	private :
@@ -35,7 +36,7 @@ class Channel {
 		//getter
 		const std::string&			getChannelName() const;
 		const std::string&			getChannelPassword() const;
-		// const std::map<std::string, Client>& getChannelOperator() const; >> search로 변경, operator로 내림
+		const std::map<std::string, Client>& getChannelOperator() const;
 		const std::string&			getChannelTopic() const;
 		const std::set<char>&		getChannelMode() const;
 		int 						getUserCnt() const;
@@ -58,7 +59,7 @@ class Channel {
 		//operator
 		Client 		 				*searchChannelOperator(std::string nickname) const;
 		void 						addChannelOperator(Client new_operator);
-		void  						deleteChannelOperator(Client operator);
+		void  						deleteChannelOperator(Client new_operator);
 
 
 		//user
