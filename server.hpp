@@ -58,6 +58,8 @@ class Server {
 		int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata);
 		void disconnectClient(int client_fd, std::map<int, std::string>& clients);
 		void parsingData(std::string message);
+
+		void commandJoin(std::vector<std::string> token, int paramcnt, int fd);
 };
 //메세지 보내는 함수
 //메세지 받는 함수
