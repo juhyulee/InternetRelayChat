@@ -1,5 +1,6 @@
 #include "util.h"
 #include "server.hpp"
+#include "Client.hpp"
 
 //int Client::checkLimit == -1  : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
 //int Channel::checkUserLimit == -1  : 채널에 가입할 수 있는 최대 인원 초과 체크
@@ -35,37 +36,31 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, int fd){
 		// 구현해야 할 명령어 정리6RPL_NAMREPLY
 		// 현재 채널에 있는 user들의 이름 목록, 공백으로 구분하며 operator 앞에는 @ 붙음
 		// RPL_ENDOFNAMES
-		return ;
 	}
 	//------------------------------------------------------exist channel
 	//------------------------------------------------------error::
-	if (ch->checkUserLimit() == -1){
+	else if (ch->checkUserLimit() == -1){
 		this->sendMessage(ERR_CHANNELISFULL(user.getNickname(), token[1]), fd);
 	}
-	if (ch->getChannelMode().find('i') != ch->getChannelMode().end()){
+	else if (ch->getChannelMode().find('i') != ch->getChannelMode().end()){
 		this->sendMessage(ERR_INVITEONLYCHAN(user.getNickname(), token[1]), fd);
 	}
-	if (ch->checkPassword(password) == -1){
+	else if (ch->checkInvite(fd) == -1 && ch->checkPassword(password) == -1){
 		this->sendMessage(ERR_BADCHANNELKEY(user.getNickname(), token[1]), fd);
 	}
-	if (ch->checkBanned(user) == -1){
-		this->sendMessage(ERR_BANNEDFROMCHAN(user.getNickname(), token[1]), fd);
-	}
-	//------------------------------------------------------Success::
+	//------------------------------------------------------Success:: exist channel
 	else {
 		ch->addChannelUser(fd, user);
 		this->broadcastChannelMessage(RPL_JOIN(user.getNickname(), token[1]), fd);
 		//위 fd map으로 바꿔야 함...
-		if (ch->getChannelTopic() != NULL){
+		if (ch->getChannelTopic() != ""){
 			//RPL_TOPIC
-			this->sendMessage(RPL_TOPIC(user.getNickname(), token[1], ch->getChannelTopic()), fd);
+			this->broadcastChannelMessage(RPL_TOPIC(user.getNickname(), token[1], ch->getChannelTopic()), fd);
 			// this->sendMessage(RPL_TOPICWHOTIME(user.getNickname(), token[1], ch->getChannelTopic()), fd);
 			//RPL_TOPICWHOTIME 마지막 값이 타임스탬프... https://modern.ircdocs.horse/#rpltopic-333
 		}
-		this->sendMessage(RPL_NAMREPLY(user.getNickname(), ch->getSymbol(), token[1], user.getPrefix()), fd);
-		//RPL_NAMREPLY :: 어케하누
+		this->broadcastChannelMessage(RPL_NAMREPLY(user.getNickname(), ch->getSymbol(), token[1], user.getPrefix()), fd);
 		this->broadcastChannelMessage(RPL_ENDOFNAMES(user.getNickname(), token[1]), fd);
-		//RPL_ENDOFNAMES
 	}
-
+	return ;
 }

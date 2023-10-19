@@ -27,5 +27,7 @@
 #include <sstream>
 #include <utility>
 
+#define CLIENT_LIMIT 10
+
 
 #endif
