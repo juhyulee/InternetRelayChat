@@ -1,10 +1,29 @@
 #include "util.h"
-#include "Server.hpp"
+#include "server.hpp"
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
 //irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
 
+Server::Server() {}
+
+Server::~Server() {}
+
+const std::string& Server::getServerName() const {
+	return this->_server_name;
+}
+
+const std::map<std::string, Channel>& Server::getChannelList() const {
+	return this->_channel_list;
+}
+
+const std::map<int, Client>& Server::getUserList() const {
+	return this->_user_list;
+}
+
+const std::string& Server::getServerPassword() const {
+	return this->_server_password;
+}
 
 void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
 int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {
