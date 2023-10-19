@@ -59,6 +59,9 @@ int 	Channel::getUserCnt() const{
 int 	Channel::getUserLimit() const{
 	return (this->_user_limit);
 };
+std::string					Channel::getSymbol(){
+	return (this->_)
+};
 
 
 
@@ -260,4 +263,35 @@ void 		Channel::deleteChannelUser(int fd){ //유저 usrlist에서 지우는 함�
 };
 void 		Channel::inviteChannelUser(int fd, Client client){ //채널에 유저 초대하는 함수
 	this->_user_invite_list.insert(std::make_pair(fd, client));
+};
+
+
+//-------------------------------------------------------------------------------->>
+//check
+//-------------------------------------------------------------------------------->>
+int 		Channel::checkPassword(std::string pw){
+	if (pw == ""){
+		if (this->_password != "")
+			return (-1);
+	}
+	else {
+		if (this->_password == "")
+			return (-1);
+		if (pw != this->_password)
+			return (-1);
+	}
+	return (0);
+};
+int 		Channel::checkUserLimit() {
+	if (this->_user_cnt < this->_user_limit)
+		return (0);
+	return (-1);
+};
+int 		Channel::checkInvite(int fd){
+	for (std::map<int, Client>::iterator iter = this->_user_invite_list.begin(); \
+		iter != this->_user_invite_list.end(); iter++){
+			if (iter->first == fd)
+				return (0);
+		}
+	return (-1);
 };

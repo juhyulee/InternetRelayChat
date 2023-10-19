@@ -59,7 +59,7 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, int fd){
 			// this->sendMessage(RPL_TOPICWHOTIME(user.getNickname(), token[1], ch->getChannelTopic()), fd);
 			//RPL_TOPICWHOTIME 마지막 값이 타임스탬프... https://modern.ircdocs.horse/#rpltopic-333
 		}
-		this->broadcastChannelMessage(RPL_NAMREPLY(user.getNickname(), ch->getSymbol(), token[1], user.getPrefix()), fd);
+		this->broadcastChannelMessage(RPL_NAMREPLY(user.getNickname(), "=", token[1], user.getPrefix()), fd);
 		this->broadcastChannelMessage(RPL_ENDOFNAMES(user.getNickname(), token[1]), fd);
 	}
 	return ;

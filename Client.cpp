@@ -16,31 +16,31 @@ std::string Client::getPrefix() const {
 	return this->nickname + username + hostname;
 }
 
-const std::string&	getNickname() const{
+const std::string&	Client::getNickname() const{
 	return (this->_nickname);
 };
-const std::string&	getUsername() const{
+const std::string&	Client::getUsername() const{
 	return (this->_username);
 };
-const std::string&	getHostname() const{
+const std::string&	Client::getHostname() const{
 	return (this->_hostname);
 };
-const std::string&	getServername() const{
+const std::string&	Client::getServername() const{
 	return (this->_servername);
 };
-const std::string&	getRealname() const{
+const std::string&	Client::getRealname() const{
 	return (this->_realname);
 };
-int			getSocketFd() const{
+int			Client::getSocketFd() const{
 	return (this->_socket_fd);
 };
 
-int getAuth() {
+int Client::getAuth() {
 	//원래 pass??
 	return (0);
 }
 
-int checkChannelLimit() const{
+int Client::checkChannelLimit() const{
 	if (this->_channel_limit > this->_channel_list.size())
 		return (0);
 	else

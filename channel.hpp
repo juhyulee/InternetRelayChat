@@ -41,7 +41,6 @@ class Channel {
 		const std::set<char>&		getChannelMode() const;
 		int 						getUserCnt() const;
 		int 						getUserLimit() const;
-		std::string					getSymbol(); //채널 퍼블릭으로 확인해서 리턴, https://modern.ircdocs.horse/#rplnamreply-353
 
 		//setter
 		void 						setChannelName(std::string new_name);
@@ -71,9 +70,9 @@ class Channel {
 		void 						inviteChannelUser(int fd, Client client);//채널에 유저 초대하는 함수
 
 		//check
-		int 			checkPassword();
-		int 			checkUserLimit() ;
-		int 			checkInvite(int fd);
+		int 						checkPassword();
+		int 						checkUserLimit() ;
+		int 						checkInvite(int fd);
 };
 
 #endif
