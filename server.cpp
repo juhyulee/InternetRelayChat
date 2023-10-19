@@ -1,342 +1,142 @@
-#include "server.hpp"
-#include "message.h"
 #include "util.h"
-#include <iterator>
-#include <ostream>
-#include <set>
-#include <sstream>
-#include <utility>
-#include <vector>
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
 //irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
 //서버네임 숫자 닉네임 메세지
 
-void Server::send_msg(std::string msg, int fd) { //메세지 전송하는 함수
-	send(fd, msg.c_str(), msg.size(), 0);
+
+void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
+int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {
+	struct kevent temp_event;
+
+	EV_SET(&temp_event, ident, filter, flags, fflags, data, udata);
+	change_list.push_back(temp_event);
 }
 
-void Server::broadcastChannelMessage(std::string message, int send_fd) {
-	for (std::map<int,Client>::iterator iter = this->usrlist.begin();
-	iter != this->usrlist.end(); iter++) {
-		send_msg(message, iter->first);
-	}
+void Server::disconnectClient(int client_fd, std::map<int, std::string>& clients) {
+	std::cout << "client disconnected: " << client_fd << std::endl;
+	close(client_fd);
+	clients.erase(client_fd);
 }
 
-void Server::read_msg(std::string msg, int fd) { // 메세지 읽는 함수
-	std::vector<std::string> token;
-	std::istringstream iss(msg);
-	std::string line;
+void Server::serverInit(int argc, char **argv) {
 
-	while (std::getline(iss, line))
-		token.push_back(line);
-	for (size_t i = 0; i < token.size(); i++) {
-		std::cout << token[i] << std::endl;
-		handle_cmd(token[i], fd); //개행 기준으로 tokenizer해서 들어감
+	(void)argc;
+	if ((_server_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+		std::cout << "socket error" << std::endl;
+		exit(0);
 	}
-}
+	int option = 1;
+	setsockopt(_server_socket, SOL_SOCKET,SO_REUSEADDR, &option, sizeof(option));
 
-void Server::handle_cmd(std::string cmd, int fd) { // 메세지 파싱하는 함수
-	std::vector<std::string> token;
-	std::istringstream iss(cmd);
-	std::string word;
-	int paramcnt = 0;
+	memset(&_server_addr, 0, sizeof(_server_addr));
+	_server_addr.sin_family = AF_INET;
+	_server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+	_server_addr.sin_port = htons(atoi(argv[1]));
 
-	while (iss >> word) {
-		token.push_back(word);
-		std::cout << "words :" << word << std::endl;
-		paramcnt += 1;
-	}
-	std::cout << "token: " << token[0] << std::endl;
-	if (token[0] == "PASS") {
-		if (paramcnt != 2) {
-			send_msg(ERR_NEEDMOREPARAMS(usrlist[fd].username, "PASS"), fd);
-		}
-		if (token[1] == serverpassword) {
-			usrlist[fd].pass += 1;
-			usrlist[fd].fd = fd;
-		}
-		else if (token[1] != serverpassword) {
-			send_msg(ERR_PASSWDMISMATCH(usrlist[fd].username), fd);
-			close(fd);
-		}
-	}
-	else if (token[0] == "NICK") {
-		std::map<int, Client>::iterator it;
-		for (it = usrlist.begin(); it != usrlist.end(); ++it) {
-			if (it->second.nickname == token[1]) {
-				send_msg(ERR_NICKNAMEINUSE(usrlist[fd].username), fd);
-			}
-		}
-		usrlist[fd].nickname = token[1];
-		usrlist[fd].pass += 1;
-	}
-	else if (token[0] == "USER") { //생성자로 대체
-		if (paramcnt != 5) {
-			send_msg(ERR_NEEDMOREPARAMS(usrlist[fd].username, "USER"), fd);
-		}
-		usrlist[fd].username = token[1];
-		usrlist[fd].hostname = token[2];
-		usrlist[fd].servername = token[3];
-		usrlist[fd].realname = token[4];
-		usrlist[fd].pass += 1;
-		checkuserinformation(usrlist[fd]);
+	if (bind(_server_socket, (struct sockaddr*)&_server_addr, sizeof(_server_addr)) == -1) {
+		std::cout << "bind error" << std::endl;
+		exit(0);
 	}
 
-	else if (token[0] == "PING") {
-		std::string pong = "irc_test\r\n";
-		send_msg(RPL_PONG(usrlist[fd].username, pong),fd);
+	if (listen(_server_socket, 5) == -1) {
+		std::cout << "listen error" << std::endl;
+		exit(0);
 	}
-	else if (token[0] == "JOIN") {
-		if (this->search_channel(token[1]) == NULL) {
-			make_channel(token[1]);
-			std::cout << "token: " << token[1] << std::endl;
-		}
-		clist[token[1]].adduser(fd, usrlist[fd]);
-		if (clist[token[1]].usrlist.size() == 1) {
-			clist[token[1]].addchanneloperator(usrlist[fd]);
-		}
-		std::map<int,Client> clients = this->clist[token[1]].usrlist;
-		std::map<std::string, Client> channeloperator = this->clist[token[1]].getchanneloperator();
-		std::string s_users;
-		for (std::map<int, Client>::iterator iter = clients.begin(); iter != clients.end(); iter++)
-		{
-			//operator 여러 명일 수 있음. 확인하는 함수로 바꿀 것
-			if (channeloperator.find(iter->second.nickname) != channeloperator.end()) {
-				s_users.append("@");
-				s_users.append(iter->second.nickname + " ");
-			}
+	fcntl(_server_socket, F_SETFL, O_NONBLOCK);
+	int kq;
+	if ((kq = kqueue()) == -1) {
+		std::cout << "kqueue() error" << std::endl;
+		exit(0);
+	}
+
+	changeEvents(_change_list, _server_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+	std::cout << "echo server started" <<std::endl;
+
+	while (1) {
+		_new_events = kevent(kq, &_change_list[0], _change_list.size(), _event_list, 8, NULL);
+		if (_new_events == -1) {
+			std::cout << "kqueue() error" << std::endl;
+			exit(0);
 		}
 
-		for (std::map<int,Client>::iterator iter = clients.begin();
-		iter != clients.end(); iter++) {
-			this->send_msg(RPL_JOIN(clients[fd].nickname, token[1]), iter->first);
-		}
-		//topic 있을 경우 RPL_TOPIC, RPL_TOPICWHOTIME send
-		this->send_msg(RPL_NAMREPLY(clients[fd].nickname, '=', token[1], s_users), fd);
-		this->send_msg(RPL_ENDOFNAMES(clients[fd].nickname, token[1]), fd);
-	}
-	else if (token[0] == "PART") { //채널나가는명령어
-		for (size_t i = 1; i <= token.size(); i++) {
-			Channel	targetChannel = this->clist[token[i]];
-			targetChannel.deleteuser(fd);
-			if (targetChannel.usrlist.size() == 0) {
-				this->clist.erase(clist.find(token[i]));
-			}
-		}
-	}
-	else if (token[0] == "NOTICE") {//메세지전송
-		Channel *target_channel = this->search_channel(token[1]);
-		std::string send_message;
-		for (size_t i = 0; i + 2 < token.size(); i++) {
-			if (i != 0) {
-				send_message += " ";
-			}
-			send_message += token[i + 2];
-		}
-		for (std::map<int, Client>::iterator iter = target_channel->usrlist.begin(); \
-			iter != target_channel->usrlist.end(); ++iter) {
-			this->send_msg(send_message, iter->second.fd);
-		}
-	}
-	else if (token[0] == "PRIVMSG") { //메세지 전송
-		if (token[2][1] == '$') {
-			Client *receive_client = this->search_user(token[2].substr(2, token[2].size()));
-			if (receive_client == NULL) {
-				// Does not exist client
-			}
-			int	receive_fd = receive_client->fd;
-			std::string send_message;
-			for (size_t i = 0; i + 3 < token.size(); i++) {
-				if (i != 0) {
-					send_message += " ";
+		_change_list.clear();
+
+		for (int i = 0; i < _new_events; ++i) {
+			_curr_event = &_event_list[i];
+
+			if (_curr_event->flags & EV_ERROR) {
+				if (int(_curr_event->ident) == _server_socket) {
+					std::cout << "server socket error" << std::endl;
+					exit(0);
 				}
-				send_message += token[i + 3];
-			}
-			Client send_client = this->usrlist[fd];
-			this->send_msg(RPL_PRIVMSG(send_client.getPrefix(), token[1], send_message), receive_fd);
-			this->send_msg(send_message, receive_fd);
-		}
-		else {
-			std::string send_message;
-			for (size_t i = 0; i + 2 < token.size(); i++) {
-				if (i != 0) {
-					send_message += " ";
-				}
-				send_message += token[i + 2];
-			}
-			Channel *target_channel = this->search_channel(token[1]);
-			std::map<int,Client> clients = target_channel->usrlist;
-			for (std::map<int,Client>::iterator iter = clients.begin();
-			iter != clients.end(); iter++) {
-				if (iter->second.fd != fd) {
-					this->send_msg(RPL_PRIVMSG(clients[fd].getPrefix(), token[1], send_message), iter->second.fd);
+				else {
+					std::cerr << "client socket error" << std::endl;
+					disconnectClient(_curr_event->ident, _clients);
 				}
 			}
-		}
-	}
-	else if (token[0] == "KICK") { //채널 방출
-		Channel *target_channel = this->search_channel(token[1]);
-		Client *target_user = target_channel->search_user(token[2]);
-		if (!target_user) {
-			//아무도 없없다다고  리리플플라라이
-			return ;
-		}
-		target_channel->deleteuser(target_user->fd);
-		// std::stringstream kick_message;
-		// kick_message << target_channel->getchannelname() << ". kicked from the channel.";
-		// if (token.size() < 3) {
-		// 	kick_message << " : " << token[3];
-		// }
-		// kick_message << std::endl;
-		this->broadcastChannelMessage(RPL_KICK(target_user->username,target_channel->getchannelname(),target_user->nickname),fd);
-		// this->send_msg(kick_message.str(), target_user->fd);
-		//리플라이 + and 유저가 없는 유저 킥했을때 예?왜?처리
-	}
-	else if (token[0] == "INVITE") { //채널에 유저 초대
-		if (token.size() != 3) {
-			// 유효하지 않은 명령어
-		}
-		Client *invite_client = this->search_user(token[1]);
-		if (invite_client == NULL) {
-			// 존재하지 않는 유저
-		}
-		Channel *invite_channel = this->search_channel(token[2]);
-		if (invite_channel == NULL) {
-			// 존재하지 않는 채널
-		}
-		invite_channel->adduser(invite_client->fd, *invite_client);
-	}
-	else if (token[0] == "TOPIC") { //토픽 + 채널명 - 토픽띄움 / 토픽 + 채널명 + 변경토픽 - 토픽변경
-		std::map<int,Client> clients = this->clist[token[1]].usrlist;
-		if (token.size() == 2) { //토픽 띄움
-			//채널이 없으면 ERR_NOSUCHCHANNEL
-			//
-			std::string view_topic = this->search_channel(token[1])->getchanneltopic();
-			if (view_topic.empty())
-				send_msg(RPL_NOTOPIC(clist[token[1]].usrlist[fd].nickname,token[1]),fd);
-			else
-			{
-				send_msg(RPL_TOPIC(usrlist[fd].nickname,token[1],token[2]),fd);
-				send_msg(RPL_TOPICWHOTIME(usrlist[fd].nickname, token[1],usrlist[fd].nickname, "0"), fd);
-			}
-		}
-		else if (token.size() == 3) { // 토픽 변경
-			//오퍼레이터 확인
-			Channel *target_channel = this->search_channel(token[1]);
-			target_channel->setchanneltopic(token[2]);
-			// 채널에 있는 모든 유저에게 broadcast
-			for (std::map<int,Client>::iterator iter = clients.begin();
-				iter != clients.end(); iter++) {
-				this->send_msg(RPL_MY_TOPIC(usrlist[fd].nickname, token[1], token[2]), iter->first);
-			}
-		}
-	}
-	else if (token[0] == "MODE") { //채널모드설정
-		Channel *channel = this->search_channel(token[1]);
-		if (channel == NULL) {
-			// Does not exist channel
-			return ;
-		}
-		if (token.size() == 2) {
-			// View channel mode
-			std::string disp_mode;
-			std::string params;
-			for (std::set<char>::iterator iter = channel->getchannelmode().begin();
-			iter != channel->getchannelmode().end(); iter++) {
-				if (iter == channel->getchannelmode().begin() && iter != channel->getchannelmode().end()) {
-					disp_mode += "+";
+			else if (_curr_event->filter == EVFILT_READ) {
+				if (int(_curr_event->ident) == _server_socket) {
+					int client_socket;
+					if ((client_socket = accept(_server_socket, NULL, NULL)) == -1) {
+						std::cout << "accept error" << std::endl;
+						exit(0);
+					}
+					std::cout << "accept new client: " << client_socket << std::endl;
+					fcntl(client_socket, F_SETFL, O_NONBLOCK);
+
+					changeEvents(_change_list, client_socket, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+					changeEvents(_change_list, client_socket, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+					_clients[client_socket] = "";
 				}
-				disp_mode += *iter;
-				if (*iter == 'k' || *iter == 'l') {
-					params += " ";
-					if (*iter == 'k') {
-						params += channel->getchannelpassword();
+				else if (_clients.find(_curr_event->ident) != _clients.end()) {
+					char buf[1024];
+					int n = recv(_curr_event->ident, buf, sizeof(buf), 0);
+
+					if (n < 0) {
+						if (n < 0)
+							std::cerr << "client read error!" << std::endl;
+						disconnectClient(_curr_event->ident, _clients);
 					}
 					else {
-						params += channel->getusrlimits();
+						buf[n] = '\0';
+						_clients[_curr_event->ident] += buf;
+						// std::cout << "received data from " << curr_event->ident << ": " << clients[curr_event->ident] << std::endl;
+						parsingData(_clients[_curr_event->ident]);
+						if (!_send_data[_curr_event->ident].empty()) {
+							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, _curr_event->udata);
+							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
+						}
 					}
 				}
 			}
-			broadcastChannelMessage(RPL_CHANNELMODEIS(this->usrlist[fd].getPrefix(), token[1], disp_mode, params), fd);
-			// broadcastChannelMessage(RPL_CHANNELMODEIS(this->usrlist[fd].getPrefix(), token[1], disp_mode, params));
-			// for (std::map<int,Client>::iterator iter = channel->usrlist.begin();
-			// iter != channel->usrlist.end(); iter++) {
-				// send_msg(RPL_MODE(this->usrlist[fd].getPrefix(), token[1], disp_mode, params), iter->first);
-			// }
-			return ;
-		}
-		if (token[2][0] != '+' && token[2][0] != '-' && token[2].size() != 2) {
-			return ;
-		}
-		std::vector<std::string> *mode_params = channel->setchannelmode(*this, token);
-		if (mode_params) {
-			broadcastChannelMessage(RPL_MODE(this->usrlist[fd].getPrefix(), channel->getchannelname(), *mode_params[0].data(), *mode_params[1].data()), fd);
-			// broadcastChannelMessage(RPL_MODE(this->usrlist[fd].getPrefix(), channel->getchannelname(), *mode_params[0].data(), *mode_params[1].data()));
-		}
-	}
-	else if (token[0] == "QUIT") { //다른 유저들한테 나갔다고 보냄
-		std::string quit_message = usrlist[fd].nickname + " :Quit\r\n";
-		std::set<int> receive_user;
-		for (std::map<int, Client>::iterator iter = usrlist.begin(); iter != usrlist.end(); iter++) {
-			if (iter->first != fd) {
-				receive_user.insert(iter->first);
+			else if (_curr_event->filter == EVFILT_WRITE) {
+				std::map<int, std::string>::iterator it = _clients.find(_curr_event->ident);
+				if (it != _clients.end()) {
+					if (!_send_data[_curr_event->ident].empty()) {//ㄴㅐ가 보보내내는는거
+						int n;
+						std::cout << "send data from" << _curr_event->ident << ": " << _send_data[_curr_event->ident] << std::endl;
+						if ((n = send(_curr_event->ident, _clients[_curr_event->ident].c_str(), _clients[_curr_event->ident].size(), 0) == -1)) {
+							std::cerr << "client write error!" << std::endl;
+							disconnectClient(_curr_event->ident, _clients);
+						}
+						else
+							_clients[_curr_event->ident].clear();
+							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
+							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
+					}
+				}
 			}
 		}
-		for (std::set<int>::iterator iter = receive_user.begin(); iter != receive_user.end(); iter++) {
-			send_msg(quit_message, *iter);
-			std::cout << "iter test: " << *iter << std::endl;
-		}
-		close(fd);
 	}
 }
 
-void Server::checkuserinformation(Client& user) {
-	std::cout << "pass " << user.nickname << std::endl;
-	if (user.pass == 3) {
-		std::string welcome = ":irc_test 001 " + user.nickname + " :Welcome to the irc Network, " + user.nickname + "!root@" + user.servername + "\r\n";
-		std::cout << welcome << std::endl;
-		send_msg(welcome, user.fd);
-	}
+void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
+	_send_data[fd] = message;
+	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
 }
 
-void Server::make_channel(std::string channelname) {
-	Channel newchannel;
-
-	newchannel.setchannelname(channelname);
-	clist[channelname] = newchannel;
+void Server::parsingData(std::string message) { //읽음
+	std::cout <<  "parsed msg : "<< message << std::endl;
+	sendMessage("001 juhyulee :Welcome to the ircbal network juhyulee! \r\n", 5);
 }
-
-Channel *Server::search_channel(std::string channelname) {
-	for (std::map<std::string, Channel>::iterator iter = this->clist.begin(); iter != this->clist.end(); ++iter) {
-		if (iter->second.getchannelname() == channelname)
-		return &iter->second;
-	}
-	return 0;
-}
-
-Client *Server::search_user(std::string nickname) {
-	for (std::map<int, Client>::iterator iter = this->usrlist.begin(); iter != this->usrlist.end(); ++iter) {
-		if (iter->second.nickname == nickname)
-		return &iter->second;
-	}
-	return 0;
-}
-
-void Server::adduser(Client user, int fd) {
-	usrlist[fd] = user;
-}
-
-void Server::deluser(Client user, int fd) {
-	(void)user; ///???
-	usrlist.erase(usrlist.find(fd));
-}
-
-// std::map<std::string, ICommand*> command;
-
-// command[token[0]]->run(token);
-
-// class ICommand
-// {
-
-// };
