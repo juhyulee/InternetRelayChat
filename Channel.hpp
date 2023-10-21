@@ -1,7 +1,7 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-// #include "client.hpp"
+#include "Client.hpp"
 #include <set>
 #include <cstdlib>
 #include <vector>
@@ -15,7 +15,7 @@ class Channel {
 	private :
 		std::string _name; // 채널이름
 		std::string _password; //채널비밀번호
-		std::map<std::string, Client> _operator; //채널오퍼레이터
+		std::map<std::string, Client> _operator;//채널오퍼레이터
 		std::string _topic; //채널토픽
 		std::set<char> _mode; //채널모드
 		int _user_cnt; //유저 인원수
@@ -68,6 +68,11 @@ class Channel {
 		void 						addChannelUser(int fd, Client client); //유저 채널에 추가하는 함수
 		void 						deleteChannelUser(int fd);//유저 usrlist에서 지우는 함수
 		void 						inviteChannelUser(int fd, Client client);//채널에 유저 초대하는 함수
+
+		//check
+		int 						checkPassword();
+		int 						checkUserLimit() ;
+		int 						checkInvite(int fd);
 };
 
 #endif

@@ -2,7 +2,8 @@
 # define SERVER_HPP
 
 # include "util.h"
-# include "channel.hpp"
+# include "Channel.hpp"
+# include "Client.hpp"
 
 class Server {
 	public :
@@ -37,29 +38,30 @@ class Server {
 		void changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
 		int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata);
 		void disconnectClient(int client_fd, std::map<int, std::string>& clients);
-		void parsingData(std::string message);
+		void parsingData(std::string message, int fd);
 
 		void pong(void);
 		void commandJoin(std::vector<std::string> token, int paramcnt, int fd);
 
-		private :
-			int _server_socket;
-			struct sockaddr_in _server_addr;
-			std::map<int, std::string> _clients;
-			std::vector<struct kevent> _change_list;
-			struct kevent _event_list[8];
-			int _new_events;
-			struct kevent* _curr_event;
-			std::map<int, std::string> _send_data;										//전송할 데이터
-			std::map<int, std::string> _recv_data;										//읽은 데이터
+	private :
+		int _server_socket;
+		struct sockaddr_in _server_addr;
+		std::map<int, std::string> _clients;
+		std::vector<struct kevent> _change_list;
+		struct kevent _event_list[8];
+		int _new_events;
+		struct kevent* _curr_event;
+		//============================서버구동부 건들지 마시오===================================
+		std::map<int, std::string> _send_data; //전송할 데이터
+		std::map<int, std::string> _recv_data; //읽은 데이터
 
-			std::string _server_name;													//서버이름
-			std::map<std::string, Channel *> _channel_list;								//채널목록
-			std::map<int, Client *> _user_list;											//유저목록
-			std::string _server_password;												//서버비밀번호
+		std::string _server_name;														//서버이름
+		std::map<std::string, Channel *> _channel_list;									//채널목록
+		std::map<int, Client *> _user_list;												//유저목록
+		std::string _server_password;													//서버비밀번호
 
-			Server(const Server& copy);													//복사생성자
-			Server& operator=(const Server& obj);										//할당연산자
+		Server(const Server& copy);														//복사생성자
+		Server& operator=(const Server& obj);											//할당연산자
 };
 //메세지 보내는 함수
 //메세지 받는 함수

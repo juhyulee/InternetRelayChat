@@ -1,7 +1,5 @@
 #include "util.h"
-#include "server.hpp"
-#include "channel.hpp"
-#include "Client.hpp"
+#include "Server.hpp"
 
 // void exit_with_perror(const std::string& msg) {
 // 	std::cerr << msg << std::endl;
