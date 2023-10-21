@@ -1,33 +1,13 @@
 #ifndef CHANNEL_HPP
-#define CHANNEL_HPP
+# define CHANNEL_HPP
 
-#include <set>
-#include <cstdlib>
-#include <vector>
-#include <map>
-#include <iostream>
+# include "util.h"
 
 class Server;
 
 class Client;
 
 class Channel {
-	private :
-		std::string				_name;			// 채널 이름
-		std::string				_password;		// 채널 비밀번호
-		std::string				_topic;			// 채널 토픽
-		std::set<char>			_mode;			// 채널 모드
-		int						_user_limit;	// 최대 유저 인원수
-		std::map<int, Client *>	_user_list;		// 유저 목록
-		std::map<int, Client *>	_invite_list;	// 유저 초대 목록
-		std::map<int, Client *>	_operator;		// 채널 오퍼레이터
-		// int						_user_count;	// get으로 대체(_user_list.size())
-
-		Channel();
-		Channel(const Channel& copy);
-		Channel& operator=(const Channel& assign);
-		void	initialize();
-
 	public :
 		Channel(const std::string& name, Client *client);
 		~Channel();
@@ -78,6 +58,23 @@ class Channel {
 		int	checkUserLimit() ;
 		int	checkInvite(Client *client);
 		int	checkPassword(std::string password);
+
+		private :
+			std::string				_name;			// 채널 이름
+			std::string				_password;		// 채널 비밀번호
+			std::string				_topic;			// 채널 토픽
+			std::set<char>			_mode;			// 채널 모드
+			int						_user_limit;	// 최대 유저 인원수
+			std::map<int, Client *>	_user_list;		// 유저 목록
+			std::map<int, Client *>	_invite_list;	// 유저 초대 목록
+			std::map<int, Client *>	_operator;		// 채널 오퍼레이터
+			// int						_user_count;	// get으로 대체(_user_list.size())
+
+			Channel();
+			Channel(const Channel& copy);
+			Channel& operator=(const Channel& assign);
+
+			void	initialize();
 };
 
 #endif
