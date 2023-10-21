@@ -7,8 +7,8 @@ class Channel;
 
 class Client {
 	public :
-		Client(int socket_fd, std::string username, std::string hostname, \
-			std::string realname, std::string user_ip);
+		Client(int socket_fd, std::string nickname, std::string username, \
+			std::string hostname, std::string realname, std::string user_ip);
 		~Client();
 
 		// Getter
@@ -27,6 +27,8 @@ class Client {
 		void	setHostname(const std::string& hostname);
 		void	setRealname(const std::string& realname);
 		void	setUserIp(const std::string& user_ip);
+		void	addChannelList(Channel *channel);
+		void	removeChannelList(Channel *channel);
 
 		std::string	getPrefix() const;
 

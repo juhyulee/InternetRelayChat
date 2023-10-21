@@ -20,9 +20,9 @@ class Server {
 		void	setServerName(const std::string& server_name);						// 서버 이름 설정
 		void	setServerPassword(const std::string& server_password);				// 서버 비밀번호 설정
 		void	addUserList(int fd, Client *user);									// 유저목록에 유저 추가
-		void	deleteUserList(int fd);												// 유저목록에서 유저 삭제
+		void	removeUserList(int fd);												// 유저목록에서 유저 삭제
 		void	addChannelList(const std::string& channel_name, Channel *channel);	// 채널목록에 채널을 추가
-		void	deleteChannelList(const std::string& channel_name);					// 채널목록에서 채널 삭제
+		void	removeChannelList(const std::string& channel_name);					// 채널목록에서 채널 삭제
 
 		// Server
 		void	serverInit(int argc, char **argv);
@@ -33,9 +33,8 @@ class Server {
 
 		// Channel
 		Channel	*makeChannel(std::string channel_name, Client *client);										// 채널 객체 생성
-		void	deleteChannel(std::string channel_name);									// 채널 객체 삭제
+		void	deleteChannel(Channel **Channel);									// 채널 객체 삭제
 		Channel	*searchChannel(std::string channel_name);									// 채널 검색
-		void	setChannelMode(std::string channel_name, std::vector<std::string> param);	// 채널 모드 설정
 
 		// Message
 		void	sendMessage(std::string message, int fd);									// 메세지 보내기

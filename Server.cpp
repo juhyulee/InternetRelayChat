@@ -1,7 +1,4 @@
-#include "util.h"
 #include "server.hpp"
-#include <iostream>
-#include <map>
 
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
@@ -28,13 +25,13 @@ void Server::addUserList(int client_fd, Client *client) {
 	_user_list.insert(std::make_pair(client_fd, client));
 }
 
-void Server::deleteUserList(int client_fd) { _user_list.erase(client_fd); }
+void Server::removeUserList(int client_fd) { _user_list.erase(client_fd); }
 
 void Server::addChannelList(const std::string& channel_name, Channel *channel) {
 	_channel_list.insert(std::make_pair(channel_name, channel));
 }
 
-void Server::deleteChannelList(const std::string& channel_name) { _channel_list.erase(channel_name); }
+void Server::removeChannelList(const std::string& channel_name) { _channel_list.erase(channel_name); }
 
 void Server::serverInit(int argc, char **argv) {
 
@@ -194,22 +191,22 @@ Channel	*Server::makeChannel(std::string channel_name, Client *client) {
 	return channel;
 }
 
-void	Server::deleteChannel(std::string channel_name) {
-	;
+void	Server::deleteChannel(Channel **channel) {
+	(*channel)->getChannelMode().clear();
+	(*channel)->getUserList().clear();
+	(*channel)->getInviteList().clear();
+	(*channel)->getChannelOperator().clear();
+	delete (*channel);
+	(*channel) = NULL;
 }
 
 Channel	*Server::searchChannel(std::string channel_name) {
 	std::map<std::string, Channel *>::iterator iter = _channel_list.find(channel_name);
-	if (iter == _channel_list.end()) {
-		return (NULL);
+	if (iter != _channel_list.end()) {
+		return iter->second;
 	}
-	return iter->second;
+	return (NULL);
 }
-
-void	Server::setChannelMode(std::string channel_name, std::vector<std::string> param) {
-	;
-}
-
 
 void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
 	_send_data[fd] = message;

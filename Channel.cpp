@@ -51,19 +51,19 @@ void	Channel::initialize(){
 //getter
 //-------------------------------------------------------------------------------->>
 
-const std::string&	Channel::getChannelName() const{
+std::string	Channel::getChannelName() const{
 	return _name;
 }
 
-const std::string&	Channel::getChannelPassword() const{
+std::string	Channel::getChannelPassword() const{
 	return _password;
 }
 
-const std::string&	Channel::getChannelTopic() const{
+std::string	Channel::getChannelTopic() const{
 	return _topic;
 }
 
-const std::set<char>&	Channel::getChannelMode() const{
+std::set<char>	Channel::getChannelMode() const{
 	return _mode;
 }
 
@@ -75,15 +75,15 @@ int Channel::getUserCount() const{
 	return _user_list.size();
 }
 
-const std::map<int, Client *>&	Channel::getUserList() const{
+std::map<int, Client *>	Channel::getUserList() const{
 	return _user_list;
 }
 
-const std::map<int, Client *>&	Channel::getInviteList() const{
+std::map<int, Client *>	Channel::getInviteList() const{
 	return _invite_list;
 }
 
-const std::map<int, Client *>&	Channel::getChannelOperator() const{
+std::map<int, Client *>	Channel::getChannelOperator() const{
 	return _operator;
 }
 
@@ -104,7 +104,7 @@ void 	Channel::setChannelPassword(std::string new_password){
 	_password = new_password;
 }
 
-void 	Channel::deleteChannelPassword(){
+void 	Channel::removeChannelPassword(){
 	_password.erase();
 }
 
@@ -197,7 +197,7 @@ std::vector<std::string>*	Channel::setChannelMode(Server &server, std::vector<st
 					// 오퍼레이터 삭제 시 채널 오퍼레이터 목록에 없을 경우 에러 처리
 					return NULL;
 				}
-				if (deleteChannelOperator(old_operator) == true) {
+				if (removeChannelOperator(old_operator) == true) {
 					mode_params->push_back(token[2]);
 					mode_params->push_back(token[3]);
 				}
@@ -209,7 +209,7 @@ std::vector<std::string>*	Channel::setChannelMode(Server &server, std::vector<st
 				mode.erase(token[2][1]);
 				// parameter 초기화
 				if (token[2][1] == 'k') {
-					this->deleteChannelPassword();
+					this->removeChannelPassword();
 				}
 				else if (token[2][1] == 'l') {
 					this->setUserLimit(100);
@@ -282,7 +282,7 @@ bool	Channel::addChannelOperator(Client *new_operator) {
 	return false;
 }
 
-bool	Channel::deleteChannelOperator(Client *old_operator) {
+bool	Channel::removeChannelOperator(Client *old_operator) {
 	if (isChannelOperator(old_operator) == true) {
 		_operator.erase(old_operator->getSocketFd());
 		return true;
@@ -320,7 +320,7 @@ bool	Channel::addChannelUser(Client *client){  //유저 채널에 추가하는 �
 	return false;
 }
 
-bool	Channel::deleteChannelUser(Client *client) { //유저 목록에서 지우는 함수
+bool	Channel::removeChannelUser(Client *client) { //유저 목록에서 지우는 함수
 	if (isChannelUser(client) == true) {
 		_user_list.erase(client->getSocketFd());
 		return true;
@@ -352,7 +352,7 @@ bool	Channel::addInvitedUser(Client *client){ //채널에 유저 초대
 	return false;
 }
 
-bool	Channel::deleteInvitedUser(Client *client){ //채널에 초대된 유저 지우기
+bool	Channel::removeInvitedUser(Client *client){ //채널에 초대된 유저 지우기
 	if (isInvitedUser(client) == true) {
 		_invite_list.erase(client->getSocketFd());
 		return true;

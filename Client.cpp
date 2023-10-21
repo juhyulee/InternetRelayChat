@@ -7,22 +7,24 @@
 // 	*this = copy;
 // }
 
-Client& Client::operator=(const Client& obj) {
-	if (this == &obj)
-		return *this;
-	_socket_fd = obj.getSocketFd();
-	_nickname = obj.getNickname();
-	_username = obj.getUsername();
-	_hostname = obj.getHostname();
-	_realname = obj.getRealname();
-	_user_ip = obj.getUserIp();
-	return *this;
-}
+// Client& Client::operator=(const Client& obj) {
+// 	if (this == &obj)
+// 		return *this;
+// 	_socket_fd = obj.getSocketFd();
+// 	_nickname = obj.getNickname();
+// 	_username = obj.getUsername();
+// 	_hostname = obj.getHostname();
+// 	_realname = obj.getRealname();
+// 	_user_ip = obj.getUserIp();
+// 	return *this;
+// }
 
-Client::Client(int socket_fd, std::string username, std::string hostname, \
-	std::string realname, std::string user_ip) \
-: _socket_fd(socket_fd), _username(username), _hostname(hostname), \
-_realname(realname), _user_ip(user_ip) {}
+Client::Client(int socket_fd, std::string nickname, std::string username, \
+	std::string hostname, std::string realname, std::string user_ip) \
+: _socket_fd(socket_fd), _nickname(nickname), _username(username), \
+_hostname(hostname), _realname(realname), _user_ip(user_ip) {
+	_channel_list = std::map<std::string, Channel *>();
+}
 
 Client::~Client() {}
 
@@ -51,6 +53,14 @@ void	Client::setHostname(const std::string& hostname) { _hostname = hostname; };
 void	Client::setRealname(const std::string& realname) { _realname = realname; };
 
 void	Client::setUserIp(const std::string& user_ip) { _user_ip = user_ip; };
+
+void	Client::addChannelList(Channel *channel) {
+	_channel_list.insert(std::pair<std::string, Channel *>(channel->getChannelName(), channel));
+}
+
+void	Client::removeChannelList(Channel *channel) {
+	_channel_list.erase(channel->getChannelName());
+}
 
 std::string	Client::getPrefix() const {
 	std::string username = "!" + _username;
