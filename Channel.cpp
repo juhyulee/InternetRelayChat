@@ -75,6 +75,14 @@ int Channel::getUserCount() const{
 	return _user_list.size();
 }
 
+const std::map<int, Client *>&	Channel::getUserList() const{
+	return _user_list;
+}
+
+const std::map<int, Client *>&	Channel::getInviteList() const{
+	return _invite_list;
+}
+
 const std::map<int, Client *>&	Channel::getChannelOperator() const{
 	return _operator;
 }
@@ -327,7 +335,7 @@ bool	Channel::isInvitedUser(Client *client) {  // 초대 목록에 있는지 확
 	return false;
 }
 
-Client	*Channel::findInviteUser(std::string nickname) {
+Client	*Channel::findInvitedUser(std::string nickname) {
 	for (std::map<int, Client *>::iterator iter = _invite_list.begin(); \
 	iter != _invite_list.end(); iter++) {
 		if (iter->second->getNickname() == nickname)
@@ -336,7 +344,7 @@ Client	*Channel::findInviteUser(std::string nickname) {
 	return NULL;
 }
 
-bool	Channel::addInviteUser(Client *client){ //채널에 유저 초대
+bool	Channel::addInvitedUser(Client *client){ //채널에 유저 초대
 	if (isChannelUser(client) == false && isInvitedUser(client) == false) {
 		_invite_list.insert(std::make_pair(client->getSocketFd(), client));
 		return true;
@@ -344,7 +352,7 @@ bool	Channel::addInviteUser(Client *client){ //채널에 유저 초대
 	return false;
 }
 
-bool	Channel::deleteInviteUser(Client *client){ //채널에 초대된 유저 지우기
+bool	Channel::deleteInvitedUser(Client *client){ //채널에 초대된 유저 지우기
 	if (isInvitedUser(client) == true) {
 		_invite_list.erase(client->getSocketFd());
 		return true;

@@ -50,9 +50,9 @@ class Channel {
 		bool	addChannelUser(Client *client);				// 유저 목록에 추가
 		bool	deleteChannelUser(Client *client);			// 유저 목록에서 지우기
 		bool	isInvitedUser(Client *client);				// 초대 목록에 있는지 확인
-		Client	*findInviteUser(std::string nickname);	// 초대 목록에서 검색
-		bool	addInviteUser(Client *client);				// 초대 목록에 추가
-		bool	deleteInviteUser(Client *client);			// 채널 목록에서 지우기
+		Client	*findInvitedUser(std::string nickname);	// 초대 목록에서 검색
+		bool	addInvitedUser(Client *client);				// 초대 목록에 추가
+		bool	deleteInvitedUser(Client *client);			// 채널 목록에서 지우기
 
 		// Check
 		int	checkUserLimit() ;
