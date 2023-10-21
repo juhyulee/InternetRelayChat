@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Channel.hpp"
 
 // Client::Client() {}
 
@@ -36,25 +37,10 @@ const std::string&	Client::getRealname() const { return _realname; };
 
 const std::string&	Client::getUserIp() const { return _user_ip; };
 
+const std::map<std::string, Channel *>& Client::getChannelList() const { return _channel_list; };
+
 std::string	Client::getPrefix() const {
 	std::string username = "!" + _username;
 	std::string hostname = "@" + _hostname;
 	return _nickname + username + hostname;
 }
-
-
-
-
-
-
-// int Client::getAuth() {
-	// 원래 pass??
-	// return 0;
-// }
-
-// int Client::checkChannelLimit() const {
-// 	if (this->_channel_limit > this->_channel_list.size())
-// 		return (0);
-// 	else
-// 		return (-1);
-// }
