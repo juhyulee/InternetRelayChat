@@ -22,11 +22,11 @@ class Client {
 
 		// Setter
 		void	setSocketFd(int socket_fd);
-		void	setNickname(std::string nickname);
-		void	setUsername(std::string username);
-		void	setHostname(std::string hostname);
-		void	setRealname(std::string realname);
-		void	setUserIp(std::string user_ip);
+		void	setNickname(const std::string& nickname);
+		void	setUsername(const std::string& username);
+		void	setHostname(const std::string& hostname);
+		void	setRealname(const std::string& realname);
+		void	setUserIp(const std::string& user_ip);
 
 		std::string	getPrefix() const;
 
