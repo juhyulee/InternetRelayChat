@@ -2,39 +2,59 @@
 #define CLIENT_HPP
 
 #include "util.h"
-#include "Channel.h"
+// #include "Channel.h"
+
+class Channel;
 
 class Client {
-	private :
-		std::string _nickname;
-		std::string _username;
-		std::string _hostname;
-		std::string _servername; //ip주소
-		std::string _realname;
-		int _socket_fd;
-		int _channel_limit;
-		std::map<std::string, Channel &> _channel_list;
-
-
 	public :
-		Client();
-		Client(std::string username, std::string hostname, std::string servername,
-		std::string realname, int fd);
+		Client(int socket_fd, std::string username, std::string hostname, \
+			std::string realname, std::string user_ip);
+		~Client();
 
-		//getter
+		// Getter
+		int					getSocketFd() const;
 		const std::string&	getNickname() const;
 		const std::string&	getUsername() const;
 		const std::string&	getHostname() const;
-		const std::string&	getServername() const;
 		const std::string&	getRealname() const;
-		int					getChannelLimit() const;
-		void				setChannelLimit(int new_limit);
-		int			getSocketFd() const;
-		int			getAuth(); //pass 처리 -1불가 0가능
+		const std::string&	getUserIp() const;
+		std::map<std::string, Channel&>&	getChannelList() const;
 
-		int			checkChannelLimit(); //-1불가 0가능 : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크 
+		// Setter
+		void	setSocketFd(int socket_fd);
+		void	setNickname(std::string nickname);
+		void	setUsername(std::string username);
+		void	setHostname(std::string hostname);
+		void	setRealname(std::string realname);
+		void	setUserIp(std::string user_ip);
 
-		std::string getPrefix() const;
+		std::string	getPrefix() const;
+
+	private :
+		int _socket_fd;
+		std::string _nickname;
+		std::string _username;
+		std::string _hostname;
+		std::string _realname;
+		std::string _user_ip; // 유저의 IP주소
+		std::map<std::string, Channel&> _channel_list; // 유저가 가입한 채널 목록
+
+		Client();
+		Client(const Client& copy);
+		Client& operator=(const Client& obj);
+
+		// Server에서는 이 함수를 통해 유저가 인증되었는지 확인할 계획.
+		// Server class로 이관 예정
+		// int					getAuth(); //pass 처리 -1불가 0가능
+
+		// 유저가 가입할 수 있는 최대 채널 수가 아니고 채널의 최대 유저 수.
+		// 다시 말해 채팅방 인원 수 제한임.
+		// Channel class로 이관
+		// int _channel_limit;
+		// int					getChannelLimit() const;
+		// void				setChannelLimit(int new_limit);
+		// int					checkChannelLimit() const; //-1불가 0가능 : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
 };
 
 #endif
