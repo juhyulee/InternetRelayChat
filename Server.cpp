@@ -12,75 +12,29 @@ Server::Server() {}
 
 Server::~Server() {}
 
-const std::string& Server::getServerName() const {
-	return _server_name;
-}
+const std::string& Server::getServerName() const { return _server_name; }
 
-const std::map<std::string, Channel *>& Server::getChannelList() const {
-	return _channel_list;
-}
+const std::string& Server::getServerPassword() const { return _server_password; }
 
-const std::map<int, Client *>& Server::getUserList() const {
-	return _user_list;
-}
+const std::map<int, Client *>& Server::getUserList() const { return _user_list; }
 
-const std::string& Server::getServerPassword() const {
-	return _server_password;
-}
+const std::map<std::string, Channel *>& Server::getChannelList() const { return _channel_list; }
 
-void Server::setServerName(const std::string& server_name) {
-	_server_name = server_name;
-}
+void Server::setServerName(const std::string& server_name) { _server_name = server_name; }
 
-void Server::addChannelList(const std::string& channel_name, Channel *channel) {
-	_channel_list.insert(std::make_pair(channel_name, channel));
-}
-
-void Server::deleteChannelList(const std::string& channel_name) {
-	_channel_list.erase(channel_name);
-}
+void Server::setServerPassword(const std::string& server_password) { _server_password = server_password; }
 
 void Server::addUserList(int client_fd, Client *client) {
 	_user_list.insert(std::make_pair(client_fd, client));
 }
 
-void Server::deleteUserList(int client_fd) {
-	_user_list.erase(client_fd);
+void Server::deleteUserList(int client_fd) { _user_list.erase(client_fd); }
+
+void Server::addChannelList(const std::string& channel_name, Channel *channel) {
+	_channel_list.insert(std::make_pair(channel_name, channel));
 }
 
-void Server::setServerPassword(const std::string& server_password) {
-	_server_password = server_password;
-}
-
-void Server::noticeChannelMessage(std::string message, int socket_fd) {
-	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
-		iter != _user_list.end(); ++iter) {
-		sendMessage(message, iter->second->getSocketFd());
-	}
-}
-
-void Server::broadcastChannelMessage(std::string message, int socket_fd) {
-	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
-		iter != _user_list.end(); ++iter) {
-		if (iter->first != socket_fd) {
-			sendMessage(message, iter->second->getSocketFd());
-		}
-	}
-}
-
-void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
-int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {
-	struct kevent temp_event;
-
-	EV_SET(&temp_event, ident, filter, flags, fflags, data, udata);
-	change_list.push_back(temp_event);
-}
-
-void Server::disconnectClient(int client_fd, std::map<int, std::string>& clients) {
-	std::cout << "client disconnected: " << client_fd << std::endl;
-	close(client_fd);
-	clients.erase(client_fd);
-}
+void Server::deleteChannelList(const std::string& channel_name) { _channel_list.erase(channel_name); }
 
 void Server::serverInit(int argc, char **argv) {
 
@@ -184,10 +138,11 @@ void Server::serverInit(int argc, char **argv) {
 							std::cerr << "client write error!" << std::endl;
 							disconnectClient(_curr_event->ident, _clients);
 						}
-						else
+						else { // 스코프 범위 다시 확실하게 변경
 							_clients[_curr_event->ident].clear();
 							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
 							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
+						}
 					}
 				}
 			}
@@ -195,9 +150,18 @@ void Server::serverInit(int argc, char **argv) {
 	}
 }
 
-void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
-	_send_data[fd] = message;
-	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
+void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
+	int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {
+	struct kevent temp_event;
+
+	EV_SET(&temp_event, ident, filter, flags, fflags, data, udata);
+	change_list.push_back(temp_event);
+}
+
+void Server::disconnectClient(int client_fd, std::map<int, std::string>& clients) {
+	std::cout << "client disconnected: " << client_fd << std::endl;
+	close(client_fd);
+	clients.erase(client_fd);
 }
 
 void Server::parsingData(std::string message, int fd) { //읽음
@@ -222,5 +186,48 @@ void Server::parsingData(std::string message, int fd) { //읽음
 	while(input_str >> word) {
 		token.push_back(word);
 		std::cout << "words :" << word << std::endl;
+	}
+}
+
+Channel	*Server::makeChannel(std::string channel_name, Client *client) {
+	Channel *channel = new Channel(channel_name, client);
+	return channel;
+}
+
+void	Server::deleteChannel(std::string channel_name) {
+	;
+}
+
+Channel	*Server::searchChannel(std::string channel_name) {
+	std::map<std::string, Channel *>::iterator iter = _channel_list.find(channel_name);
+	if (iter == _channel_list.end()) {
+		return (NULL);
+	}
+	return iter->second;
+}
+
+void	Server::setChannelMode(std::string channel_name, std::vector<std::string> param) {
+	;
+}
+
+
+void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
+	_send_data[fd] = message;
+	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
+}
+
+void Server::noticeChannelMessage(std::string message, int socket_fd) {
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+		iter != _user_list.end(); ++iter) {
+		sendMessage(message, iter->second->getSocketFd());
+	}
+}
+
+void Server::broadcastChannelMessage(std::string message, int socket_fd) {
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+		iter != _user_list.end(); ++iter) {
+		if (iter->first != socket_fd) {
+			sendMessage(message, iter->second->getSocketFd());
+		}
 	}
 }

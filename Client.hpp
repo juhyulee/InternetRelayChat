@@ -12,12 +12,12 @@ class Client {
 		~Client();
 
 		// Getter
-		int					getSocketFd() const;
-		const std::string&	getNickname() const;
-		const std::string&	getUsername() const;
-		const std::string&	getHostname() const;
-		const std::string&	getRealname() const;
-		const std::string&	getUserIp() const;
+		int										getSocketFd() const;
+		const std::string&						getNickname() const;
+		const std::string&						getUsername() const;
+		const std::string&						getHostname() const;
+		const std::string&						getRealname() const;
+		const std::string&						getUserIp() const;
 		const std::map<std::string, Channel *>&	getChannelList() const;
 
 		// Setter
@@ -31,13 +31,13 @@ class Client {
 		std::string	getPrefix() const;
 
 	private :
-		int _socket_fd;
-		std::string _nickname;
-		std::string _username;
-		std::string _hostname;
-		std::string _realname;
-		std::string _user_ip; // 유저의 IP주소
-		std::map<std::string, Channel *> _channel_list; // 유저가 가입한 채널 목록
+		int									_socket_fd;
+		std::string							_nickname;
+		std::string							_username;
+		std::string							_hostname;
+		std::string							_realname;
+		std::string							_user_ip; // 유저의 IP주소
+		std::map<std::string, Channel *>	_channel_list; // 유저가 가입한 채널 목록
 
 		/*
 		* 생성자, 복사생성자, 할당연산자는 private으로,
@@ -45,10 +45,10 @@ class Client {
 		*/
 		Client();
 		Client(const Client& copy);
-		Client& operator=(const Client& obj);
+		Client&	operator=(const Client& obj);
 
 		/*
-		* Server에서는 이 함수를 통해 유저가 인증되었는지 확인할 계획.
+		* Server에서 이 함수를 통해 유저가 인증되었는지 확인할 계획.
 		* Server class로 이관 예정
 		*/
 
