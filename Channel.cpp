@@ -67,11 +67,11 @@ std::set<char>	Channel::getChannelMode() const{
 	return _mode;
 }
 
-int Channel::getUserLimit() const{
+size_t	Channel::getUserLimit() const{
 	return _user_limit;
 }
 
-int Channel::getUserCount() const{
+std::map<int, Client *>::size_type	Channel::getUserCount() const{
 	return _user_list.size();
 }
 
@@ -243,14 +243,14 @@ void 	Channel::setUserLimit(int new_limits){
 //Msg
 //-------------------------------------------------------------------------------->>
 
-void 	Channel::broadcastChannelMessage(int send_fd, std::string message) {
-	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
-		iter != _user_list.end(); iter++) {
-			if (iter->second->getSocketFd() == send_fd)
-				continue ;
+// void 	Channel::broadcastChannelMessage(int send_fd, std::string message) {
+	// for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+		// iter != _user_list.end(); iter++) {
+			// if (iter->second->getSocketFd() == send_fd)
+				// continue ;
 			// sendmsg --> 서버 필요한지?
-		}
-}
+		// }
+// }
 
 
 

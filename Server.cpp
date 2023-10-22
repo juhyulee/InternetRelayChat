@@ -1,4 +1,4 @@
-#include "server.hpp"
+#include "Server.hpp"
 
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
@@ -213,7 +213,7 @@ void Server::sendMessage(std::string message, int fd) { //메세지 보내는 �
 	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
 }
 
-void Server::noticeChannelMessage(std::string message, int socket_fd) {
+void Server::noticeChannelMessage(std::string message) {
 	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
 		iter != _user_list.end(); ++iter) {
 		sendMessage(message, iter->second->getSocketFd());

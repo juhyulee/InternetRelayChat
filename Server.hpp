@@ -38,7 +38,7 @@ class Server {
 
 		// Message
 		void	sendMessage(std::string message, int fd);									// 메세지 보내기
-		void	noticeChannelMessage(std::string message, int socket_fd);					// 채널에 메세지 보내기 (본인 포함)
+		void	noticeChannelMessage(std::string message);					// 채널에 메세지 보내기 (본인 포함)
 		void	broadcastChannelMessage(std::string message, int socket_fd);				// 채널에 메세지 보내기 (본인 제외)
 
 		// Command
