@@ -2,7 +2,6 @@
 
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
-//irssi -c 10.12.1.6 -p 8080 -w 1234 -n juhyulee
 //docker run -d --name ubuntu -p 80:80 -it --privileged ubuntu:20.04
 //서버네임 숫자 닉네임 메세지
 
@@ -133,7 +132,7 @@ void Server::serverInit(int argc, char **argv) {
 					if (!_send_data[_curr_event->ident].empty()) {//ㄴㅐ가 보보내내는는거
 						int n;
 						std::cout << "send data from" << _curr_event->ident << ": " << _send_data[_curr_event->ident] << std::endl;
-						if ((n = send(_curr_event->ident, _clients[_curr_event->ident].c_str(), _clients[_curr_event->ident].size(), 0) == -1)) {
+						if ((n = send(_curr_event->ident, _send_data[_curr_event->ident].c_str(), _send_data[_curr_event->ident].size(), 0) == -1)) {
 							std::cerr << "client write error!" << std::endl;
 							disconnectClient(_curr_event->ident, _clients);
 						}
@@ -282,7 +281,7 @@ Client	*Server::searchClient(std::string nickname){
 			return (iter->second);
 	}
 	return (NULL);
-};
+}
 
 Client	*Server::searchClient(int fd){
 	std::map<int, Client *>::iterator iter= _user_list.find(fd);
@@ -290,8 +289,7 @@ Client	*Server::searchClient(int fd){
 		return iter->second;
 	}
 	return (NULL);
-
-};
+}
 
 bool Server::getAuth(Client *user){
 	if (this->searchClient(user->getSocketFd()) == NULL){
