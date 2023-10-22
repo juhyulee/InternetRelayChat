@@ -3,6 +3,7 @@ SERVER = ircserv
 SRCS_D = ./
 SRCS_F = $(addsuffix .cpp,			\
 			Server					\
+			Server_cmd				\
 			Channel					\
 			Client					\
 			main					\

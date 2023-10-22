@@ -54,4 +54,7 @@
 # define RPL_MODE(user, channel, modes, params) ":" + user + " MODE " + channel + " " + modes + params + "\r\n"
 # define RPL_NICK(before, after) ":" + before + " NICK :" + after + "\r\n"
 
+
+
+#define ERR_ALREADYREGISTERED(client) client + " :You may not reregister\r\n"
 #endif  // MESSAGE_H

@@ -377,6 +377,12 @@ int	Channel::checkInvite(Client *client) {
 	}
 	return -1;
 }
+int	Channel::checkInvite(int fd) {
+	if (_invite_list.find(fd) != _invite_list.end()) {
+		return 0;
+	}
+	return -1;
+}
 
 int	Channel::checkPassword(std::string password) {
 	if (_password != "" && _password != password) {

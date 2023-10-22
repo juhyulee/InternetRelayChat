@@ -57,6 +57,7 @@ class Channel {
 		// Check
 		int	checkUserLimit() ;
 		int	checkInvite(Client *client);
+		int	checkInvite(int fd);
 		int	checkPassword(std::string password);
 
 		private :

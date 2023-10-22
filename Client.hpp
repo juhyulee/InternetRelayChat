@@ -10,6 +10,8 @@ class Client {
 		Client(int socket_fd, std::string nickname, std::string username, \
 			std::string hostname, std::string realname, std::string user_ip);
 		~Client();
+		Client();
+		Client(int socket_fd);
 
 		// Getter
 		int										getSocketFd() const;
@@ -31,6 +33,9 @@ class Client {
 		void	removeChannelList(Channel *channel);
 
 		std::string	getPrefix() const;
+		int		getChannelLimit() const;
+		void	setChannelLimit(int new_limit);
+		int		checkChannelLimit() const; //-1불가 0가능 : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
 
 	private :
 		int									_socket_fd;
@@ -40,12 +45,13 @@ class Client {
 		std::string							_realname;
 		std::string							_user_ip; // 유저의 IP주소
 		std::map<std::string, Channel *>	_channel_list; // 유저가 가입한 채널 목록
+		int 								_channel_limit;
+		
 
 		/*
-		* 생성자, 복사생성자, 할당연산자는 private으로,
+		* 복사생성자, 할당연산자는 private으로,
 		* 구현이 필요하다면 cpp파일에서 주석을 해제하여 사용
 		*/
-		Client();
 		Client(const Client& copy);
 		Client&	operator=(const Client& obj);
 
@@ -62,15 +68,12 @@ class Client {
 		* 유저가 가입할 수 있는 최대 채널 수가 아니고 채널의 최대 유저 수.
 		* 다시 말해 채팅방 인원 수 제한임.
 		* Channel class로 이관
-		*/
 
-		/*
-		* int _channel_limit;
-		*
-		* int	getChannelLimit() const;
-		* void	setChannelLimit(int new_limit);
-		* int	checkChannelLimit() const; //-1불가 0가능 : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
+		 >>>> 이거 에러 리스트에 있음, ERR_TOOMANYCHANNELS
+		 추가해둠(siw)
 		*/
+		
+		
 };
 
 #endif

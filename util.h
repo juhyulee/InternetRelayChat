@@ -23,6 +23,14 @@
 
 # include "message.h"
 
-# define CLIENT_LIMIT 10
+// for class client
+# define CLIENT_CHANNEL_LIMIT 10
+# define D_REALNAME "default_realname"
+
+
+// for class channel
+# define CHANNEL_USER_LIMIT 1000
+
+
 
 #endif
