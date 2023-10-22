@@ -29,7 +29,7 @@ class Server {
 		void	changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
 				int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata);
 		void	disconnectClient(int client_fd, std::map<int, std::string>& clients);
-		void	parsingData(std::string message, int fd);
+		void	parsingData(int fd);
 
 		// Channel
 		Channel	*makeChannel(std::string channel_name, Client *client);										// 채널 객체 생성

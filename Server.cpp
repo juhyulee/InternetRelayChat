@@ -2,7 +2,8 @@
 
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
-//irssi -c 10.12.9.2 -p 8080 -w 1234 -n juhyulee
+//irssi -c 10.12.1.6 -p 8080 -w 1234 -n juhyulee
+//docker run -d --name ubuntu -p 80:80 -it --privileged ubuntu:20.04
 //서버네임 숫자 닉네임 메세지
 
 Server::Server() {}
@@ -108,7 +109,7 @@ void Server::serverInit(int argc, char **argv) {
 					char buf[1024];
 					int n = recv(_curr_event->ident, buf, sizeof(buf), 0);
 
-					if (n < 0) {
+					if (n <= 0) {
 						if (n < 0)
 							std::cerr << "client read error!" << std::endl;
 						disconnectClient(_curr_event->ident, _clients);
@@ -116,8 +117,9 @@ void Server::serverInit(int argc, char **argv) {
 					else {
 						buf[n] = '\0';
 						_clients[_curr_event->ident] += buf;
-						// std::cout << "received data from " << curr_event->ident << ": " << clients[curr_event->ident] << std::endl;
-						parsingData(_clients[_curr_event->ident],_curr_event->ident);
+						// std::cout << "received data from " << _curr_event->ident << ": " << _clients[_curr_event->ident] << std::endl;
+						parsingData(_curr_event->ident);
+						//===================parsing==============================
 						if (!_send_data[_curr_event->ident].empty()) {
 							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, _curr_event->udata);
 							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
@@ -161,28 +163,42 @@ void Server::disconnectClient(int client_fd, std::map<int, std::string>& clients
 	clients.erase(client_fd);
 }
 
-void Server::parsingData(std::string message, int fd) { //읽음
+void Server::parsingData(int fd) { //읽음
 	std::vector<std::string> token;
-	size_t pos = 0;
+	size_t pos;
 	std::string line;
 
-	while (1) {
-		if (message.find("\r\n") != std::string::npos) {
-			pos = message.find("\r\n");
-			line = message.substr(0, pos + 1);
-			std::cout << "line : " << line << std::endl;
-			break;
-		}
-		else {
-			_clients[fd] + message;
+	while (!_clients[fd].empty()) {
+		if (_clients[fd].find("\r\n") != std::string::npos) {
+			pos = _clients[fd].find("\r\n");
+			line = _clients[fd].substr(0, pos + 2);
+			token.push_back(line);
+			_clients[fd].erase(0, pos + 2);
 		}
 	}
-	std::istringstream input_str(line);
-	std::string word;
 
-	while(input_str >> word) {
-		token.push_back(word);
-		std::cout << "words :" << word << std::endl;
+	for (size_t i = 0; i < token.size();i++) {
+		std::istringstream input_str(token[i]);
+		std::string word;
+		std::vector<std::string>	tokenizer;
+
+		while(input_str >> word) {
+			tokenizer.push_back(word);
+			std::cout << "words : " << word << std::endl;
+		}
+
+		// if (tokenizer[0] == "PASS") {}
+		// else if (tokenizer[0] == "NICK") {}
+		// else if (tokenizer[0] == "USER") {}
+		// else if (tokenizer[0] == "PING") {}
+		// else if (tokenizer[0] == "OPER") {}
+		// else if (tokenizer[0] == "QUIT") {}
+		// else if (tokenizer[0] == "TOPIC") {}
+		// else if (tokenizer[0] == "LIST") {}
+		// else if (tokenizer[0] == "INVITE") {}
+		// else if (tokenizer[0] == "KICK") {}
+		// else if (tokenizer[0] == "MODE") {}
+		// else {}
 	}
 }
 
