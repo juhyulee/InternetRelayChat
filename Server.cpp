@@ -189,6 +189,9 @@ void Server::parsingData(int fd) { //읽음
 			token.push_back(line);
 			_clients[fd].erase(0, pos + 2);
 		}
+		else {
+			break;
+		}
 	}
 	for (size_t i = 0; i < token.size();i++) {
 		std::istringstream input_str(token[i]);
