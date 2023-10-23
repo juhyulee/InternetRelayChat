@@ -128,9 +128,11 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 	if (token[2][0] != '+' && token[2][0] != '-') {
 		throw ChannelModeException(ERR_NOSUCHNICK(client->getNickname(), token[2]));
 	}
+	// 설정하려는 모드가 없음
 	else if (token[2].length() == 1) {
 		throw ChannelModeException("hi");
 	}
+	// 설정하려는 모드가 여러개임
 	else if (token[2].length() > 2) {
 		throw ChannelModeException("hi");
 	}
@@ -183,12 +185,12 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 		if (switch_mode == 0) {
 			if (token[2][1] == 'o') {
 				Client *new_operator = findChannelUser(token[3]);
+				// 오퍼레이터 추가 시 채널 유저 목록에 없을 경우 에러 처리
 				if (new_operator == NULL) {
-					// 오퍼레이터 추가 시 채널 유저 목록에 없을 경우 에러 처리
-					return NULL;
+					throw ChannelModeException(ERR_USERNOTINCHANNEL(client->getNickname(), token[3], _name));
 				}
 				if (addChannelOperator(new_operator) == false) {
-					// 이미 오퍼레이터인 경우
+					// 이미 오퍼레이터인 경우 (변경 없음, 응답 또한 없음)
 					return NULL;
 				}
 				else {
@@ -200,6 +202,10 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 				_mode.insert(token[2][1]);
 				// 해당 멤버에 저장
 				if (token[2][1] == 'k') {
+					// 채널 비밀번호 20자 제한 있다고 함. 동작 확인 필요
+					if (token[3].length() > 20) {
+						throw ChannelModeException(ERR_LONGPWD(client->getNickname(), _name));
+					}
 					setChannelPassword(token[3]);
 				}
 				else if (token[2][1] == 'l') {
@@ -210,6 +216,7 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 				mode_params->push_back(" " + token[3]);
 			}
 			else {
+				// 변경하려는 모드(k, l)가 이미 적용된 경우 동작 확인 필요
 				return NULL;
 			}
 		}
@@ -241,6 +248,7 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 				mode_params->push_back(token[2]);
 			}
 			else {
+			// 변경하려는 모드(k, l)가 이미 적용되지 않은 경우 동작 확인 필요
 				return NULL;
 			}
 		}

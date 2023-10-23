@@ -143,6 +143,10 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 	if (channel == NULL) {
 		sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
 	}
+	// 요청한 클라이언트가 해당 채널에 존재하는지 확인
+	// 클라이언트에 메소드 추가
+	// else if () {
+	// }
 	else if (token.size() == 2) {
 		std::vector<std::string> *mode_params = channel->getChannelModeParams();
 		sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
