@@ -59,15 +59,15 @@ class Server {
 		void	commandUser(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		void	commandJoin(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		void	commandPing(std::vector<std::string> token, int paramcnt, Client * user, int fd);
+		void	commandPart(std::vector<std::string> token, Client * user, int fd);
 
 		//구현전 - 매개변수 임의로 넣어둠
-		// void	commandOper(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		// void	commandQuit(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		// void	commandTopic(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		// void	commandList(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		// void	commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		// void	commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd);
+		//void	commandQuit(std::vector<std::string> token, Client * user, int fd);
+		void	commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd);//수도코드
+		void	commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd);//수도코드
 		// void	commandMode(std::vector<std::string> token, int paramcnt, Client * user, int fd);
+		//prvmsg
 
 	private :
 		int							_server_socket;
