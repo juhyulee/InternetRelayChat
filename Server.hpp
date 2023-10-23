@@ -61,13 +61,13 @@ class Server {
 
 		void	commandJoin(std::vector<std::string> token, Client * user, int fd);
 		//구현전 - 매개변수 임의로 넣어둠
-		// void	commandOper(std::vector<std::string> token, int fd);
-		// void	commandQuit(std::vector<std::string> token, int fd);
-		// void	commandTopic(std::vector<std::string> token, int fd);
-		// void	commandList(std::vector<std::string> token, int fd);
-		// void	commandInvite(std::vector<std::string> token, int fd);
-		// void	commandKick(std::vector<std::string> token, int fd);
-		// void	commandMode(std::vector<std::string> token, int fd);
+		void	commandPart(std::vector<std::string> token, Client * user, int fd);
+		// void	commandQuit(std::vector<std::string> token, Client * user, int fd);
+		// void	commandTopic(std::vector<std::string> token, Client * user, int fd);
+		// void	commandList(std::vector<std::string> token, Client * user, int fd);
+		// void	commandInvite(std::vector<std::string> token, Client * user, int fd);
+		// void	commandKick(std::vector<std::string> token, Client * user, int fd);
+		// void	commandMode(std::vector<std::string> token, Client * user, int fd);
 
 	private :
 		int							_server_socket;

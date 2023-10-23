@@ -181,8 +181,7 @@ void Server::parsingData(int fd) { //읽음
 	size_t pos;
 	std::string line;
 	Client *user = NULL;
-
-	while (!_clients[fd].empty()) {
+	while (!_clients[fd].empty()) { 
 		if (_clients[fd].find("\r\n") != std::string::npos) {
 			pos = _clients[fd].find("\r\n");
 			line = _clients[fd].substr(0, pos + 2);
@@ -197,12 +196,10 @@ void Server::parsingData(int fd) { //읽음
 		std::istringstream input_str(token[i]);
 		std::string word;
 		std::vector<std::string>	tokenizer;
-		int paramcnt = -1;
 
 		while(input_str >> word) {
 			tokenizer.push_back(word);
 			std::cout << "words : " << word << std::endl;
-			paramcnt++;
 		}
 		if (tokenizer[0] == "PASS" || tokenizer[0] == "NICK" || tokenizer[0] == "USER")
 		{

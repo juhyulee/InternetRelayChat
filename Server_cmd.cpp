@@ -6,7 +6,7 @@
 //int Channel::checkUserLimit == -1  : 채널에 가입할 수 있는 최대 인원 초과 체크
 
 void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
-	std:: string password = NULL;
+	std:: string password = "";
 	std:: string & channel_name = token[1];
 	const int paramcnt = token.size();
 
@@ -180,7 +180,7 @@ void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) 
 	temp->removeChannelUser(user);
 }
 
-void	Server::commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd){
+// void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){
 	//invite nickname #channel - 파라미터
 	//정상 실행 시
 		//해당 유저 인바이트 리스트에 추가
@@ -195,8 +195,8 @@ void	Server::commandInvite(std::vector<std::string> token, int paramcnt, Client 
 		//ERR_NOTONCHANNEL(user, channel)
 	//이미 채널에 있는 유저일경우
 		//ERR_USERONCHANNEL(user, nick, channel)
-}
-void	Server::commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd){
+// }
+// void	Server::commandKick(std::vector<std::string> token, Client * user, int fd){
 	//kick #channel nickname - 파라미터
 	//정살 실행시 해당 채널에 broadcast
 	//닉네임이 없는 경우
@@ -212,4 +212,4 @@ void	Server::commandKick(std::vector<std::string> token, int paramcnt, Client * 
 	//오퍼레이터가 방에 없는 경우 -? 이건 뭔소리고
 		//ERR_CHANOPRIVSNEEDED2(user, channel)\
 
-}
+// }
