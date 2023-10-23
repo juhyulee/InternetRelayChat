@@ -30,7 +30,7 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, Client * 
 		// 구현해야 할 명령어 정리6RPL_NAMREPLY
 		// 현재 채널에 있는 user들의 이름 목록, 공백으로 구분하며 operator 앞에는 @ 붙음
 		// RPL_ENDOFNAMES
-		
+
 	}
 	//------------------------------------------------------exist channel
 	//------------------------------------------------------error::client exceed max channel cnt
@@ -131,5 +131,30 @@ void	Server::commandPing(std::vector<std::string> token, int paramcnt, Client * 
 	}
 	else{
 		this->sendMessage(RPL_PONG(user->getPrefix(), token[1]), fd);
+	}
+}
+
+void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
+	if (token.size() == 1) {
+		sendMessage(ERR_NEEDMOREPARAMS(user->getPrefix(), token[0]), fd);
+		return ;
+	}
+	Channel *channel = searchChannel(token[1]);
+	if (channel == NULL) {
+		sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
+	}
+	else if (token.size() == 2) {
+		std::vector<std::string> *mode_params = channel->getChannelModeParams();
+		sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
+	}
+	else {
+		try {
+			std::vector<std::string> *mode_params = channel->setChannelMode(token, user);
+			if (mode_params) {
+				broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]));
+			}
+		} catch (std::exception &e) {
+			sendMessage(e.what(), fd);
+		}
 	}
 }
