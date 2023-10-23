@@ -160,13 +160,27 @@ void Server::disconnectClient(int client_fd, std::map<int, std::string>	clients)
 	std::cout << "client disconnected: " << client_fd << std::endl;
 	close(client_fd);
 	clients.erase(client_fd);
+	std::map<int, Client *>::iterator it;
+	it = this->_temp_list.find(client_fd);
+	if (it != this->_temp_list.end()) //temp list에 있는 fd
+	{
+		delete it->second;
+		this->_temp_list.erase(client_fd);
+		return ;
+	}
+	it = this->_user_list.find(client_fd);
+	if (it != this->_user_list.end()) //user list에 있는 fd
+	{
+		delete it->second;
+		this->_user_list.erase(client_fd); 
+	}
 }
 
 void Server::parsingData(int fd) { //읽음
 	std::vector<std::string> token;
 	size_t pos;
 	std::string line;
-	bool check_auth = false;
+	Client *user = NULL;
 
 	while (!_clients[fd].empty()) {
 		if (_clients[fd].find("\r\n") != std::string::npos) {
@@ -175,16 +189,6 @@ void Server::parsingData(int fd) { //읽음
 			token.push_back(line);
 			_clients[fd].erase(0, pos + 2);
 		}
-	}
-	Client *user = this->searchClient(fd);
-	if (!user)
-	{
-		user = new Client(fd);
-		user->setSocketFd(fd);
-		check_auth = 1;
-	}
-	if (!user){
-		std::cout << "no user error : undefined" <<std::endl;
 	}
 	for (size_t i = 0; i < token.size();i++) {
 		std::istringstream input_str(token[i]);
@@ -197,36 +201,48 @@ void Server::parsingData(int fd) { //읽음
 			std::cout << "words : " << word << std::endl;
 			paramcnt++;
 		}
+		if (tokenizer[0] == "PASS" || tokenizer[0] == "NICK" || tokenizer[0] == "USER")
+		{
+			if (tokenizer[0] == "PASS") {commandPass(tokenizer, fd);}
+			else if (tokenizer[0] == "NICK") {commandNick(tokenizer, fd);}
+			else if (tokenizer[0] == "USER") {commandUser(tokenizer, fd);}
+			user = this->searchTemp(fd);
+			if (this->getAuth(user) == true)
+			{
+				this->_temp_list.erase(fd);
+				this->addUserList(fd, user);
+				std::cout<< RPL_WELCOME(user->getNickname()) << std::endl;
+				this->sendMessage(RPL_WELCOME(user->getNickname()), fd);
+			}
+		}
+		else 
+		{
+			user = this->searchClient(fd);
+			if (!user)
+			{
+				std::cout <<"unregistered user fd: "<<fd << std::endl;
+				return;
+			}
+			if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, user, fd);}
+			else if (tokenizer[0] == "PING") {commandPing(tokenizer, user, fd);}
+			// else if (tokenizer[0] == "QUIT") {}
+			// else if (tokenizer[0] == "TOPIC") {}
+			// else if (tokenizer[0] == "INVITE") {}
+			// else if (tokenizer[0] == "KICK") {}
+			// else if (tokenizer[0] == "MODE") {}
+		}
+		
+	}
+}
 
-		if (tokenizer[0] == "PASS") {commandPass(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "NICK") {commandNick(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "USER") {commandUser(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "PING") {commandPing(tokenizer, paramcnt, user, fd);}
-		// else if (tokenizer[0] == "OPER") {}
-		// else if (tokenizer[0] == "QUIT") {}
-		// else if (tokenizer[0] == "TOPIC") {}
-		// else if (tokenizer[0] == "LIST") {}
-		// else if (tokenizer[0] == "INVITE") {}
-		// else if (tokenizer[0] == "KICK") {}
-		// else if (tokenizer[0] == "MODE") {}
-		// else {}
-	}
-	if (check_auth)
-	{
-		if (getAuth(user) == false)
-		{
-			std::cout << "get auth error" << std::endl;
-			delete user;
-			return ;
-		}
-		else
-		{
-			//this->sendMessage("001 " + user->getNickname() + " :Welcome to the <networkname> Network, " + user->getPrefix(),fd);
-			std::cout<< RPL_WELCOME(user->getNickname()) << std::endl;
-			this->sendMessage(RPL_WELCOME(user->getNickname()), fd);
-		}
-	}
+bool	Server::getAuth(Client const *user) {
+	if (user->getPass() == false)
+		return false ;
+	if (user->getUsername() == "" || user->getRealname() == "")
+		return false ;
+	if (user->getNickname() == "")
+		return false ;
+	return true ;
 }
 
 Channel	*Server::makeChannel(std::string channel_name, Client *client) {
@@ -291,17 +307,10 @@ Client	*Server::searchClient(int fd){
 	return (NULL);
 }
 
-bool Server::getAuth(Client *user){
-	if (this->searchClient(user->getSocketFd()) == NULL){
-		std::cout << "AUTHERR:: no pass" << std::endl;//pass안된 경우
-		return false;
+Client	*Server::searchTemp(int fd){
+	std::map<int, Client *>::iterator iter= _temp_list.find(fd);
+	if (iter != _temp_list.end()) {
+		return iter->second;
 	}
-	// if (this->searchClient(user->getSocketFd())) //중복검사
-	//닉네임 중복검사, username 디폴트로 넣어도 됨
-	if (user->getNickname() != "" && user->getUsername() != "")
-		return true;
-	std::cout << "AUTHERR:: name err" << std::endl;
-	std::cout << "Nickname "<< user->getNickname() << "\ngetUsername "<< user->getUsername() <<std::endl;
-	this->removeUserList(user->getSocketFd());
-	return false;
+	return (NULL);
 }

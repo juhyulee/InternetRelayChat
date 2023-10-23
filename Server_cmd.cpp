@@ -5,9 +5,10 @@
 //int Client::checkLimit == -1  : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
 //int Channel::checkUserLimit == -1  : 채널에 가입할 수 있는 최대 인원 초과 체크
 
-void	Server::commandJoin(std::vector<std::string> token, int paramcnt, Client * user, int fd){
+void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	std:: string password = NULL;
 	std:: string & channel_name = token[1];
+	const int paramcnt = token.size();
 
 	if (paramcnt >= 2)
 		password = token[2];
@@ -70,63 +71,100 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, Client * 
 }
 
 
-void	Server::commandUser(std::vector<std::string> token, int paramcnt, Client * user, int fd)
+void	Server::commandUser(std::vector<std::string> token, int fd)
 {
 	//USER "username" "hostname" "servername" :"realname"
-	(void)fd;
-	std::cout << "commandUser\n";
 	std::string realname = D_REALNAME;
-	if (paramcnt == 4 && token [4][0] == ':')
-		realname = &(token[4][1]);
-	if (paramcnt == 4)
+	Client *user = this->searchClient(fd);
+	const int paramcnt = token.size();
+
+	if(user != NULL) // already in user_list
 	{
-		user->setUsername(token[1]);
-		user->setHostname(token[2]);
-		user->setUserIp(token[3]);
-		user->setRealname(realname);
+		this->sendMessage(ERR_ALREADYREGISTERED(user->getNickname()), fd);
+		return ;
 	}
-	else
+	if (paramcnt == 5 && token [4][0] == ':')
+		realname = &(token[4][1]);
+	else //param err
 	{
-		//error ??
-		std::cout << "USERERR:: "<<token[0] <<token[1]<<token[2]<<token[3]<<std::endl;
+		this->sendMessage(ERR_NEEDMOREPARAMS((std::string)"root", (std::string)"USER"), fd);
+		return ;
 	}
 
+	user = this->searchTemp(fd);
+	if (!user)
+	{
+		user = new Client(fd);
+		this->_temp_list.insert(std::make_pair(fd, user));
+	}
+	user->setUsername(token[1]);
+	user->setHostname(token[2]);
+	user->setUserIp(token[3]);
+	user->setRealname(realname);
 };
 
-void	Server::commandPass(std::vector<std::string> token, int paramcnt, Client * user, int fd){
+void	Server::commandPass(std::vector<std::string> token, int fd){
+	Client * user = NULL;
+	user = this->_temp_list.find(fd)->second;
 	if(this->searchClient(fd) != NULL){
 		this->sendMessage(ERR_ALREADYREGISTERED(user->getNickname()), fd);
 	}
-	else if (paramcnt != 1){
+	else if (token.size() != 2){
 		this->sendMessage(ERR_NEEDMOREPARAMS((std::string)"root", (std::string)"PASS"), fd);
 	}
 	else if (this->getServerPassword() != token[1]){
 		this->sendMessage(ERR_PASSWDMISMATCH((std::string)"root"), fd);
 		//disconnect?
 	}
-	else {
-		this->addUserList(fd, user);
+	else if (user != this->_temp_list.end()->second) // pass correct && temp user exist 
+	{
+		user->setPass();
+	}
+	else { // pass correct && temp user none
+		user = new Client(fd);
+		user->setPass();
+		this->_temp_list.insert(std::make_pair(fd, user));
 	}
 	return ;
 };
 
 
 
-void	Server::commandNick(std::vector<std::string> token, int paramcnt, Client * user, int fd)
+void	Server::commandNick(std::vector<std::string> token, int fd)
 {
-	if (paramcnt != 1){
+	Client *user = NULL;
+	if (token.size() != 2){
 		this->sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), (std::string)"NICK"), fd);
 		return ;
 	}
-	user->setNickname(token[1]);
-
+	if (this->searchClient(token[1])){
+		this->sendMessage(ERR_NICKNAMEINUSE(token[1]), fd);
+		return;
+	};
+	user = this->searchClient(fd);
+	if (user != NULL)
+	{
+		user->setNickname(token[1]);
+		return;
+	}
+	user = this->searchTemp(fd);
+	if (user != NULL)
+	{
+		user->setNickname(token[1]);
+	}
+	else
+	{
+		user = new Client(fd);
+		user->setNickname(token[1]);
+		this->_temp_list.insert(std::make_pair(fd, user));
+	}
 };
 
 
-void	Server::commandPing(std::vector<std::string> token, int paramcnt, Client * user, int fd)
+void	Server::commandPing(std::vector<std::string> token, Client * user,  int fd)
 {
 	std::cout << "check pong" << RPL_PONG(user->getPrefix(), token[1]) << std::endl;
-	if (paramcnt != 1){
+	if (token.size() != 2){
 		this->sendMessage(ERR_NOORIGIN(user->getNickname()), fd);
 	}
 	else{
