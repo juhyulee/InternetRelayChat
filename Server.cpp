@@ -251,6 +251,7 @@ bool	Server::getAuth(Client const *user) {
 
 Channel	*Server::makeChannel(std::string channel_name, Client *client) {
 	Channel *channel = new Channel(channel_name, client);
+	addChannelList(channel_name, channel);
 	return channel;
 }
 

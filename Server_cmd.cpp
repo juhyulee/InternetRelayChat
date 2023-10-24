@@ -21,10 +21,11 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	Channel *ch = this->searchChannel(channel_name);
 	//------------------------------------------------------success::new channel
 	if (!ch){
-		ch = new Channel(token[1], user);
-		this->addChannelList(token[1], ch);
+		ch = makeChannel(token[1], user);
 		// 채널에 있는 모든 유저들에게 broadcast RPL_JOIN ok
-		this->broadcastChannelMessage(RPL_JOIN(user->getPrefix(), channel_name));
+		this->sendMessage(RPL_JOIN(user->getNickname(), channel_name),fd);
+		this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
+		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
 		// 채널에 topic이 설정되어 있는 경우
 		// RPL_TOPIC
 		// RPL_TOPICWHOTIME
@@ -54,16 +55,12 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	//------------------------------------------------------Success:: exist channel
 	else {
 		ch->addChannelUser(user);
-		this->broadcastChannelMessage(RPL_JOIN(user->getNickname(), channel_name), fd);
-		//위 fd map으로 바꿔야 함...
+		this->sendMessage(RPL_JOIN(user->getNickname(), channel_name),fd);
 		if (ch->getChannelTopic() != ""){
-			//RPL_TOPIC
-			this->broadcastChannelMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
-			// this->sendMessage(RPL_TOPICWHOTIME(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
-			//RPL_TOPICWHOTIME 마지막 값이 타임스탬프... https://modern.ircdocs.horse/#rpltopic-333
+			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
 		}
+		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
 		this->broadcastChannelMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, user->getPrefix()), fd);
-		this->broadcastChannelMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
 	}
 	return ;
 
@@ -208,11 +205,19 @@ void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) 
 	std::cout << token.size() << std::endl;
 	if (token.size() != 2)
 		return ;
-	Channel * temp = searchChannel(token[1]);
-	std::cout << temp << std::endl;
-	std::cout << temp->removeChannelUser(user) << std::endl;
-	std::cout << token.size() << std::endl;
-	broadcastChannelMessage(RPL_QUIT(user->getNickname(), ": from this channel"), fd);
+	Channel * ch = searchChannel(token[1]);
+	std::cout << ch << std::endl;
+	if (!ch){
+		sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
+		return ;
+	}
+	if (ch->isChannelUser(user) == false){
+		sendMessage(ERR_NOTONCHANNEL(user->getNickname(), token[1]), fd);
+		return ;
+	}
+	ch->removeChannelUser(user);
+	sendMessage(RPL_PART(user->getPrefix(), token[1]), fd);
+	broadcastChannelMessage(RPL_QUIT(user->getNickname(), ": from this channel"));
 }
 
 // void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){

@@ -30,7 +30,8 @@
 
 Channel::Channel(const std::string& name, Client *client) :_name(name) {
 	this->initialize();
-	this->_operator.insert(std::make_pair(client->getSocketFd(), client));
+	this->addChannelUser(client);
+	this->addChannelOperator(client);
 }
 
 Channel::~Channel() {}
@@ -339,8 +340,8 @@ void	Channel::clearChannelOperator(){
 //-------------------------------------------------------------------------------->>
 
 bool	Channel::isChannelUser(Client *client) { // 유저 목록에 있는지 확인
-	std::map<int, Client *> ::iterator iter = _user_list.begin();
-	for (iter ; iter != _user_list.end(); iter++){
+	for (std::map<int, Client *> ::iterator iter = _user_list.begin()\
+	; iter != _user_list.end(); iter++){
 		if (iter->second == client)
 			return true ;
 	}
@@ -368,7 +369,7 @@ Client	*Channel::findChannelUser(Client *client) { // 유저 목록에서 찾아
 
 bool	Channel::addChannelUser(Client *client){  //유저 채널에 추가하는 함수
 	Client *user = findChannelUser(client);
-	if (isChannelUser(client) == false) {
+	if (!user) {
 		_user_list.insert(std::make_pair(client->getSocketFd(), client));
 		return true;
 	}
@@ -376,8 +377,10 @@ bool	Channel::addChannelUser(Client *client){  //유저 채널에 추가하는 �
 }
 
 bool	Channel::removeChannelUser(Client *client) { //유저 목록에서 지우는 함수
-	if (isChannelUser(client) == true) {
+	Client *user = findChannelUser(client);
+	if (user) {
 		_user_list.erase(client->getSocketFd());
+		std::cout << client->getNickname() << "is parted from channel "<< _name << std::endl;
 		return true;
 	}
 	return false;
