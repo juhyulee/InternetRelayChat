@@ -25,6 +25,7 @@ class Client {
 
 		// Setter
 		void	setSocketFd(int socket_fd);
+		void	setPass();
 		void	setNickname(const std::string& nickname);
 		void	setUsername(const std::string& username);
 		void	setHostname(const std::string& hostname);
@@ -34,6 +35,7 @@ class Client {
 		void	removeChannelList(Channel *channel);
 		void	setChannelLimit(int new_limit);
 
+		bool	getPass() const;
 		std::string	getPrefix() const;
 		int			checkChannelLimit() const; //-1불가 0가능 : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
 
@@ -46,6 +48,7 @@ class Client {
 		std::string							_user_ip; // 유저의 IP주소
 		std::map<std::string, Channel *>	_channel_list; // 유저가 가입한 채널 목록
 		int 								_channel_limit;
+		bool 								_pass;
 
 
 		/*

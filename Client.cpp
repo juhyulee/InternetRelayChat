@@ -1,9 +1,24 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 
-Client::Client() {}
+Client::Client() : _pass(false) {
+	this->_nickname = "";
+	this->_hostname = "";
+	this->_username = "";
+	this->_socket_fd = -1;
+	this->_realname = "";
+	_channel_list = std::map<std::string, Channel *>();
+	_channel_limit = CLIENT_CHANNEL_LIMIT;
+}
 
-Client::Client(int socket_fd) : _socket_fd(socket_fd){}
+Client::Client(int socket_fd) : _socket_fd(socket_fd), _pass(false) {
+	this->_nickname = "";
+	this->_hostname = "";
+	this->_username = "";
+	this->_realname = "";
+	_channel_limit = CLIENT_CHANNEL_LIMIT;
+	_channel_list = std::map<std::string, Channel *>();
+}
 
 // Client::Client(const Client& copy) {
 // 	*this = copy;
@@ -24,8 +39,10 @@ Client::Client(int socket_fd) : _socket_fd(socket_fd){}
 Client::Client(int socket_fd, std::string nickname, std::string username, \
 	std::string hostname, std::string realname, std::string user_ip) \
 : _socket_fd(socket_fd), _nickname(nickname), _username(username), \
-_hostname(hostname), _realname(realname), _user_ip(user_ip), _channel_limit(CLIENT_CHANNEL_LIMIT){
+_hostname(hostname), _realname(realname), _user_ip(user_ip), \
+_pass(false){
 	_channel_list = std::map<std::string, Channel *>();
+	_channel_limit = CLIENT_CHANNEL_LIMIT;
 }
 
 Client::~Client() {}
@@ -41,6 +58,8 @@ const std::string&	Client::getHostname() const { return _hostname; };
 const std::string&	Client::getRealname() const { return _realname; };
 
 const std::string&	Client::getUserIp() const { return _user_ip; };
+
+bool				Client::getPass() const { return _pass; };
 
 int					Client::getChannelLimit() const { return _channel_limit; };
 
@@ -59,6 +78,8 @@ void	Client::setRealname(const std::string& realname) { _realname = realname; };
 void	Client::setUserIp(const std::string& user_ip) { _user_ip = user_ip; };
 
 void	Client::setChannelLimit(int new_limit) { _channel_limit = new_limit; };
+
+void	Client::setPass() { _pass = true; };
 
 void	Client::addChannelList(Channel *channel) {
 	_channel_list.insert(std::pair<std::string, Channel *>(channel->getChannelName(), channel));
@@ -80,3 +101,4 @@ std::string	Client::getPrefix() const {
 	std::string hostname = "@" + _hostname;
 	return _nickname + username + hostname;
 }
+
