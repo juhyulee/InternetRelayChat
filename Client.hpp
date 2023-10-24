@@ -7,11 +7,11 @@ class Channel;
 
 class Client {
 	public :
-		Client(int socket_fd, std::string nickname, std::string username, \
-			std::string hostname, std::string realname, std::string user_ip);
-		~Client();
 		Client();
 		Client(int socket_fd);
+		Client(int socket_fd, std::string nickname, std::string username,
+			std::string hostname, std::string realname, std::string user_ip);
+		~Client();
 
 		// Getter
 		int										getSocketFd() const;
@@ -45,24 +45,14 @@ class Client {
 		std::string							_realname;
 		std::string							_user_ip; // 유저의 IP주소
 		std::map<std::string, Channel *>	_channel_list; // 유저가 가입한 채널 목록
-		int 								_channel_limit;
-
+		int									_channel_limit;
 
 		/*
-		* 복사생성자, 할당연산자는 private으로,
-		* 구현이 필요하다면 cpp파일에서 주석을 해제하여 사용
+		* 복사생성자, 대입연산자는 private으로,
+		* 구현이 필요하다면 Server.cpp에서 주석을 해제하여 사용
 		*/
 		Client(const Client& copy);
 		Client&	operator=(const Client& obj);
-
-		/*
-		* Server에서 이 함수를 통해 유저가 인증되었는지 확인할 계획.
-		* Server class로 이관 예정
-		*/
-
-		/*
-		* int	getAuth(); //pass 처리 -1불가 0가능
-		*/
 
 		/*
 		* 유저가 가입할 수 있는 최대 채널 수가 아니고 채널의 최대 유저 수.

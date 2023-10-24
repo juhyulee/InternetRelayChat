@@ -41,13 +41,6 @@ class Channel {
 		std::vector<std::string>	*setChannelMode(std::vector<std::string> token, Client *client);
 		void 						setUserLimit(int new_limits);
 
-
-		//msg		보류: Server에서 처리하게 될 것 같음
-		// void	broadcastChannelMessage(int send_fd, std::string message);// 채널에 메세지 보내는 함수
-		// ^^^ send_fd == -1 자기자신 포함, 유저일 때는 비포함
-		//특정 유저한테 보낼 메세지 서버로 보냄
-		//전체 유저한테 보낼 메세지 서버로 보냄
-
 		// Mode
 		void						clearChannelMode();
 		std::vector<std::string>	*getChannelModeParams() const;
@@ -88,7 +81,6 @@ class Channel {
 			std::map<int, Client *>	_user_list;		// 유저 목록
 			std::map<int, Client *>	_invite_list;	// 유저 초대 목록
 			std::map<int, Client *>	_operator;		// 채널 오퍼레이터
-			// int						_user_count;	// get으로 대체(_user_list.size())
 
 			Channel();
 			Channel(const Channel& copy);

@@ -3,7 +3,7 @@
 
 Client::Client() {}
 
-Client::Client(int socket_fd) : _socket_fd(socket_fd){}
+Client::Client(int socket_fd) : _socket_fd(socket_fd) {}
 
 // Client::Client(const Client& copy) {
 // 	*this = copy;
@@ -21,10 +21,10 @@ Client::Client(int socket_fd) : _socket_fd(socket_fd){}
 // 	return *this;
 // }
 
-Client::Client(int socket_fd, std::string nickname, std::string username, \
-	std::string hostname, std::string realname, std::string user_ip) \
-: _socket_fd(socket_fd), _nickname(nickname), _username(username), \
-_hostname(hostname), _realname(realname), _user_ip(user_ip), _channel_limit(CLIENT_CHANNEL_LIMIT){
+Client::Client(int socket_fd, std::string nickname, std::string username,
+	std::string hostname, std::string realname, std::string user_ip)
+: _socket_fd(socket_fd), _nickname(nickname), _username(username),
+_hostname(hostname), _realname(realname), _user_ip(user_ip), _channel_limit(CLIENT_CHANNEL_LIMIT) {
 	_channel_list = std::map<std::string, Channel *>();
 }
 
@@ -64,12 +64,12 @@ void	Client::addChannelList(Channel *channel) {
 	_channel_list.insert(std::pair<std::string, Channel *>(channel->getChannelName(), channel));
 }
 
-int		Client::checkChannelLimit() const{
+int	Client::checkChannelLimit() const{
 	int cnt = this->_channel_list.size();
 	if (cnt < this->_channel_limit)
 		return (0);
 	return (-1);
-}; 
+};
 
 void	Client::removeChannelList(Channel *channel) {
 	_channel_list.erase(channel->getChannelName());

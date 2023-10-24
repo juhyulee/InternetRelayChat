@@ -1,6 +1,5 @@
 #include "Server.hpp"
 #include "message.h"
-#include <vector>
 
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
@@ -11,33 +10,31 @@ Server::Server() {}
 
 Server::~Server() {}
 
-const std::string& Server::getServerName() const { return _server_name; }
+const std::string&	Server::getServerName() const { return _server_name; }
 
-const std::string& Server::getServerPassword() const { return _server_password; }
+const std::string&	Server::getServerPassword() const { return _server_password; }
 
-const std::map<int, Client *>& Server::getUserList() const { return _user_list; }
+const std::map<int, Client *>&	Server::getUserList() const { return _user_list; }
 
-const std::map<std::string, Channel *>& Server::getChannelList() const { return _channel_list; }
+const std::map<std::string, Channel *>&	Server::getChannelList() const { return _channel_list; }
 
-void Server::setServerName(const std::string& server_name) { _server_name = server_name; }
+void	Server::setServerName(const std::string& server_name) { _server_name = server_name; }
 
-void Server::setServerPassword(const std::string& server_password) { _server_password = server_password; }
+void	Server::setServerPassword(const std::string& server_password) { _server_password = server_password; }
 
-void Server::addUserList(int client_fd, Client *client) {
-	_user_list.insert(std::make_pair(client_fd, client));
-}
+void	Server::addUserList(int client_fd, Client *client) { _user_list.insert(std::make_pair(client_fd, client)); }
 
-void Server::removeUserList(int client_fd) { _user_list.erase(client_fd); }
+void	Server::removeUserList(int client_fd) { _user_list.erase(client_fd); }
 
-void Server::addChannelList(const std::string& channel_name, Channel *channel) {
+void	Server::addChannelList(const std::string& channel_name, Channel *channel) {
 	_channel_list.insert(std::make_pair(channel_name, channel));
 }
 
-void Server::removeChannelList(const std::string& channel_name) { _channel_list.erase(channel_name); }
+void	Server::removeChannelList(const std::string& channel_name) { _channel_list.erase(channel_name); }
 
-void Server::serverInit(int argc, char **argv) {
+void	Server::serverInit(int argc, char **argv) {
 
-	(void)argc;
+	(void) argc;
 	_server_password = argv[2];
 	if ((_server_socket = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
 		std::cout << "socket error" << std::endl;
@@ -93,7 +90,7 @@ void Server::serverInit(int argc, char **argv) {
 				}
 			}
 			else if (_curr_event->filter == EVFILT_READ) {
-				if (int(_curr_event->ident) == _server_socket) {
+				if ((int) _curr_event->ident == _server_socket) {
 					int client_socket;
 					if ((client_socket = accept(_server_socket, NULL, NULL)) == -1) {
 						std::cout << " error" << std::endl;
@@ -120,7 +117,7 @@ void Server::serverInit(int argc, char **argv) {
 						_clients[_curr_event->ident] += buf;
 						std::cout << "received data from " << _curr_event->ident << ": " << _clients[_curr_event->ident] << std::endl;
 						parsingData(_curr_event->ident);
-						//===================parsing==============================
+						// ===================parsing==============================
 						if (!_send_data[_curr_event->ident].empty()) {
 							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, _curr_event->udata);
 							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
@@ -131,14 +128,16 @@ void Server::serverInit(int argc, char **argv) {
 			else if (_curr_event->filter == EVFILT_WRITE) {
 				std::map<int, std::string>::iterator it = _clients.find(_curr_event->ident);
 				if (it != _clients.end()) {
-					if (!_send_data[_curr_event->ident].empty()) {//ㄴㅐ가 보보내내는는거
+					// 내가 보내는거
+					if (!_send_data[_curr_event->ident].empty()) {
 						int n;
 						std::cout << "send data from" << _curr_event->ident << ": " << _send_data[_curr_event->ident] << std::endl;
 						if ((n = send(_curr_event->ident, _send_data[_curr_event->ident].c_str(), _send_data[_curr_event->ident].size(), 0) == -1)) {
 							std::cerr << "client write error!" << std::endl;
 							disconnectClient(_curr_event->ident, _clients);
 						}
-						else { // 스코프 범위 다시 확실하게 변경
+						// 스코프 범위 다시 확실하게 변경
+						else {
 							_send_data[_curr_event->ident].clear();
 							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
 							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
@@ -150,7 +149,7 @@ void Server::serverInit(int argc, char **argv) {
 	}
 }
 
-void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
+void	Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident,
 	int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata) {
 	struct kevent temp_event;
 
@@ -158,13 +157,14 @@ void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ide
 	change_list.push_back(temp_event);
 }
 
-void Server::disconnectClient(int client_fd, std::map<int, std::string>	clients) {
+void	Server::disconnectClient(int client_fd, std::map<int, std::string>	clients) {
 	std::cout << "client disconnected: " << client_fd << std::endl;
 	close(client_fd);
 	clients.erase(client_fd);
 }
 
-void Server::parsingData(int fd) { //읽음
+// 읽음
+void	Server::parsingData(int fd) {
 	std::vector<std::string> token;
 	size_t pos;
 	std::string line;
@@ -182,19 +182,18 @@ void Server::parsingData(int fd) { //읽음
 		}
 	}
 	Client *user = this->searchClient(fd);
-	if (!user)
-	{
+	if (!user) {
 		user = new Client(fd);
 		user->setSocketFd(fd);
 		check_auth = 1;
 	}
-	if (!user){
+	if (!user) {
 		std::cout << "no user error : undefined" <<std::endl;
 	}
 	for (size_t i = 0; i < token.size();i++) {
 		std::istringstream input_str(token[i]);
 		std::string word;
-		std::vector<std::string>	tokenizer;
+		std::vector<std::string> tokenizer;
 		int paramcnt = -1;
 
 		while(input_str >> word) {
@@ -203,27 +202,24 @@ void Server::parsingData(int fd) { //읽음
 			paramcnt++;
 		}
 
-		if (tokenizer[0] == "PASS") {commandPass(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "NICK") {commandNick(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "USER") {commandUser(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, paramcnt, user, fd);}
-		else if (tokenizer[0] == "PING") {commandPing(tokenizer, paramcnt, user, fd);}
+		if (tokenizer[0] == "PASS") { commandPass(tokenizer, paramcnt, user, fd); }
+		else if (tokenizer[0] == "NICK") { commandNick(tokenizer, paramcnt, user, fd); }
+		else if (tokenizer[0] == "USER") { commandUser(tokenizer, paramcnt, user, fd); }
+		else if (tokenizer[0] == "JOIN") { commandJoin(tokenizer, paramcnt, user, fd); }
+		else if (tokenizer[0] == "PING") { commandPing(tokenizer, paramcnt, user, fd); }
+		else if (tokenizer[0] == "MODE") { commandMode(tokenizer, user, fd); }
 		// else if (tokenizer[0] == "QUIT") {}
 		// else if (tokenizer[0] == "TOPIC") {}
 		// else if (tokenizer[0] == "INVITE") {}
 		// else if (tokenizer[0] == "KICK") {}
-		// else if (tokenizer[0] == "MODE") {}
 	}
-	if (check_auth)
-	{
-		if (getAuth(user) == false)
-		{
+	if (check_auth) {
+		if (getAuth(user) == false) {
 			std::cout << "get auth error" << std::endl;
 			delete user;
 			return ;
 		}
-		else
-		{
+		else {
 			//this->sendMessage("001 " + user->getNickname() + " :Welcome to the <networkname> Network, " + user->getPrefix(),fd);
 			std::cout<< RPL_WELCOME(user->getNickname()) << std::endl;
 			this->sendMessage(RPL_WELCOME(user->getNickname()), fd);
@@ -250,23 +246,24 @@ Channel	*Server::searchChannel(std::string channel_name) {
 	if (iter != _channel_list.end()) {
 		return iter->second;
 	}
-	return (NULL);
+	return NULL;
 }
 
-void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
+// 메세지 보내는 함수
+void	Server::sendMessage(std::string message, int fd) {
 	_send_data[fd] += message;
 	//changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
 }
 
-void Server::broadcastChannelMessage(std::string message) {
-	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+void	Server::broadcastChannelMessage(std::string message) {
+	for (std::map<int, Client *>::iterator iter = _user_list.begin();
 		iter != _user_list.end(); ++iter) {
 		sendMessage(message, iter->second->getSocketFd());
 	}
 }
 
-void Server::broadcastChannelMessage(std::string message, int socket_fd) {
-	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+void	Server::broadcastChannelMessage(std::string message, int socket_fd) {
+	for (std::map<int, Client *>::iterator iter = _user_list.begin();
 		iter != _user_list.end(); ++iter) {
 		if (iter->first != socket_fd) {
 			sendMessage(message, iter->second->getSocketFd());
@@ -275,33 +272,36 @@ void Server::broadcastChannelMessage(std::string message, int socket_fd) {
 }
 
 
-Client	*Server::searchClient(std::string nickname){
-	for (std::map<int, Client *>::iterator iter = this->_user_list.begin();\
-	iter != _user_list.end(); iter++)
-	{
-		if (iter->second->getNickname() == nickname)
-			return (iter->second);
+Client	*Server::searchClient(std::string nickname) {
+	for (std::map<int, Client *>::iterator iter = this->_user_list.begin();
+		iter != _user_list.end(); iter++) {
+		if (iter->second->getNickname() == nickname) {
+			return iter->second;
+		}
 	}
-	return (NULL);
+	return NULL;
 }
 
-Client	*Server::searchClient(int fd){
+Client	*Server::searchClient(int fd) {
 	std::map<int, Client *>::iterator iter= _user_list.find(fd);
 	if (iter != _user_list.end()) {
 		return iter->second;
 	}
-	return (NULL);
+	return NULL;
 }
 
-bool Server::getAuth(Client *user){
-	if (this->searchClient(user->getSocketFd()) == NULL){
-		std::cout << "AUTHERR:: no pass" << std::endl;//pass안된 경우
+bool	Server::getAuth(Client *user) {
+	if (this->searchClient(user->getSocketFd()) == NULL) {
+		// pass안된 경우
+		std::cout << "AUTHERR:: no pass" << std::endl;
 		return false;
 	}
-	// if (this->searchClient(user->getSocketFd())) //중복검사
+	// 중복검사
+	// if (this->searchClient(user->getSocketFd())) {}
 	//닉네임 중복검사, username 디폴트로 넣어도 됨
-	if (user->getNickname() != "" && user->getUsername() != "")
+	if (user->getNickname() != "" && user->getUsername() != "") {
 		return true;
+	}
 	std::cout << "AUTHERR:: name err" << std::endl;
 	std::cout << "Nickname "<< user->getNickname() << "\ngetUsername "<< user->getUsername() <<std::endl;
 	this->removeUserList(user->getSocketFd());

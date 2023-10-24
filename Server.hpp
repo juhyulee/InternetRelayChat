@@ -52,7 +52,6 @@ class Server {
 		bool	getAuth(Client *user);													// 인증
 		bool	getAuth(int fd);
 
-
 		// Command
 		void	commandPass(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		void	commandNick(std::vector<std::string> token, int paramcnt, Client * user, int fd);
