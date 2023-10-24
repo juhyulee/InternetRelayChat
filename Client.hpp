@@ -49,7 +49,11 @@ class Client {
 		std::map<std::string, Channel *>	_channel_list; // 유저가 가입한 채널 목록
 		int 								_channel_limit;
 		bool 								_pass;
+<<<<<<< HEAD
 
+=======
+		
+>>>>>>> 0ee7ccbf2c56b1c1941cc576c54a8f303d1b0d72
 
 		/*
 		* 복사생성자, 할당연산자는 private으로,

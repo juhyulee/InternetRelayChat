@@ -50,7 +50,7 @@ class Server {
 
 		Client	*searchClient(std::string nickname);										// 유저 검색
 		Client	*searchClient(int fd);
-		Client	*searchTemp(int fd);								// 유저 검색
+		Client	*searchTemp(int fd);								// 임시 유저 검색 - 인증 전 유저들
 
 
 		// Command
@@ -67,7 +67,11 @@ class Server {
 		// void	commandList(std::vector<std::string> token, Client * user, int fd);
 		// void	commandInvite(std::vector<std::string> token, Client * user, int fd);
 		// void	commandKick(std::vector<std::string> token, Client * user, int fd);
+<<<<<<< HEAD
 		void	commandMode(std::vector<std::string> token, Client * user, int fd);
+=======
+		// void	commandMode(std::vector<std::string> token, Client * user, int fd);
+>>>>>>> 0ee7ccbf2c56b1c1941cc576c54a8f303d1b0d72
 
 	private :
 		int							_server_socket;
