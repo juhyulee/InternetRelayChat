@@ -1,4 +1,6 @@
 #include "Server.hpp"
+#include "message.h"
+#include <vector>
 
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
@@ -251,10 +253,10 @@ Channel	*Server::makeChannel(std::string channel_name, Client *client) {
 }
 
 void	Server::deleteChannel(Channel **channel) {
-	(*channel)->getChannelMode().clear();
-	(*channel)->getUserList().clear();
-	(*channel)->getInviteList().clear();
-	(*channel)->getChannelOperator().clear();
+	(*channel)->clearChannelMode();
+	(*channel)->clearUserList();
+	(*channel)->clearInviteList();
+	(*channel)->clearChannelOperator();
 	delete (*channel);
 	(*channel) = NULL;
 }

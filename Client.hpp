@@ -21,6 +21,7 @@ class Client {
 		const std::string&						getRealname() const;
 		const std::string&						getUserIp() const;
 		const std::map<std::string, Channel *>&	getChannelList() const;
+		int										getChannelLimit() const;
 
 		// Setter
 		void	setSocketFd(int socket_fd);
@@ -32,12 +33,11 @@ class Client {
 		void	setUserIp(const std::string& user_ip);
 		void	addChannelList(Channel *channel);
 		void	removeChannelList(Channel *channel);
+		void	setChannelLimit(int new_limit);
 
 		bool	getPass() const;
 		std::string	getPrefix() const;
-		int		getChannelLimit() const;
-		void	setChannelLimit(int new_limit);
-		int		checkChannelLimit() const; //-1불가 0가능 : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
+		int			checkChannelLimit() const; //-1불가 0가능 : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
 
 	private :
 		int									_socket_fd;
@@ -75,8 +75,8 @@ class Client {
 		 >>>> 이거 에러 리스트에 있음, ERR_TOOMANYCHANNELS
 		 추가해둠(siw)
 		*/
-		
-		
+
+
 };
 
 #endif

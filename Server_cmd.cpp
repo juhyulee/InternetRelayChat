@@ -172,6 +172,36 @@ void	Server::commandPing(std::vector<std::string> token, Client * user,  int fd)
 	}
 }
 
+void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
+	if (token.size() == 1) {
+		sendMessage(ERR_NEEDMOREPARAMS(user->getPrefix(), token[0]), fd);
+		return ;
+	}
+	Channel *channel = searchChannel(token[1]);
+	if (channel == NULL) {
+		sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
+	}
+	// 요청한 클라이언트가 해당 채널에 존재하는지 확인
+	// 클라이언트에 메소드 추가
+	// else if () {
+	// }
+	else if (token.size() == 2) {
+		std::vector<std::string> *mode_params = channel->getChannelModeParams();
+		sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
+	}
+	else {
+		try {
+			std::vector<std::string> *mode_params = channel->setChannelMode(token, user);
+			if (mode_params) {
+				broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]));
+			}
+		} catch (std::exception &e) {
+			sendMessage(e.what(), fd);
+		}
+	}
+}
+
+
 void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) {
 	if (token.size() != 2)
 		return ;
