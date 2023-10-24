@@ -117,7 +117,7 @@ void	Server::commandPass(std::vector<std::string> token, int fd){
 		this->sendMessage(ERR_PASSWDMISMATCH((std::string)"root"), fd);
 		//disconnect?
 	}
-	else if (user != this->_temp_list.end()->second) // pass correct && temp user exist 
+	else if (user != this->_temp_list.end()->second) // pass correct && temp user exist
 	{
 		user->setPass();
 	}
@@ -205,11 +205,14 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 
 
 void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) {
+	std::cout << token.size() << std::endl;
 	if (token.size() != 2)
 		return ;
-	broadcastChannelMessage(RPL_QUIT(user->getNickname(), ": from this channel"), fd);
 	Channel * temp = searchChannel(token[1]);
-	temp->removeChannelUser(user);
+	std::cout << temp << std::endl;
+	std::cout << temp->removeChannelUser(user) << std::endl;
+	std::cout << token.size() << std::endl;
+	broadcastChannelMessage(RPL_QUIT(user->getNickname(), ": from this channel"), fd);
 }
 
 // void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){

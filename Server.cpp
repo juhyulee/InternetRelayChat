@@ -3,7 +3,7 @@
 #include <vector>
 
 //10.11.3.2
-//irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
+//irssi -c 10.12.1.7 -p 8080 -w 1234 -n juhyulee
 //docker run -d --name ubuntu -p 80:80 -it --privileged ubuntu:20.04
 //서버네임 숫자 닉네임 메세지
 
@@ -161,7 +161,8 @@ void Server::changeEvents(std::vector<struct kevent>& change_list, uintptr_t ide
 void Server::disconnectClient(int client_fd, std::map<int, std::string>	clients) {
 	std::cout << "client disconnected: " << client_fd << std::endl;
 	close(client_fd);
-	clients.erase(client_fd);
+	(void)clients;
+	this->_clients.erase(client_fd);
 	std::map<int, Client *>::iterator it;
 	it = this->_temp_list.find(client_fd);
 	if (it != this->_temp_list.end()) //temp list에 있는 fd
@@ -174,7 +175,7 @@ void Server::disconnectClient(int client_fd, std::map<int, std::string>	clients)
 	if (it != this->_user_list.end()) //user list에 있는 fd
 	{
 		delete it->second;
-		this->_user_list.erase(client_fd); 
+		this->_user_list.erase(client_fd);
 	}
 }
 
@@ -183,7 +184,7 @@ void Server::parsingData(int fd) { //읽음
 	size_t pos;
 	std::string line;
 	Client *user = NULL;
-	while (!_clients[fd].empty()) { 
+	while (!_clients[fd].empty()) {
 		if (_clients[fd].find("\r\n") != std::string::npos) {
 			pos = _clients[fd].find("\r\n");
 			line = _clients[fd].substr(0, pos + 2);
@@ -217,7 +218,7 @@ void Server::parsingData(int fd) { //읽음
 				this->sendMessage(RPL_WELCOME(user->getNickname()), fd);
 			}
 		}
-		else 
+		else
 		{
 			user = this->searchClient(fd);
 			if (!user)
@@ -227,13 +228,14 @@ void Server::parsingData(int fd) { //읽음
 			}
 			if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, user, fd);}
 			else if (tokenizer[0] == "PING") {commandPing(tokenizer, user, fd);}
-			// else if (tokenizer[0] == "QUIT") {commandQuit(tokenizer, user, fd);}
+			else if (tokenizer[0] == "PART") {commandPart(tokenizer, user, fd);}
+			// else if (tokenizer[0] == "QUIT") {}
 			// else if (tokenizer[0] == "TOPIC") {}
 			// else if (tokenizer[0] == "INVITE") {}
 			// else if (tokenizer[0] == "KICK") {}
 			else if (tokenizer[0] == "MODE") {commandMode(tokenizer, user, fd);}
 		}
-		
+
 	}
 }
 
