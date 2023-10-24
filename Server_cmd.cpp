@@ -21,8 +21,8 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	Channel *ch = this->searchChannel(channel_name);
 	//------------------------------------------------------success::new channel
 	if (!ch){
-		ch = new Channel(token[0], user);
-		this->addChannelList(token[0], ch);
+		ch = new Channel(token[1], user);
+		this->addChannelList(token[1], ch);
 		// 채널에 있는 모든 유저들에게 broadcast RPL_JOIN ok
 		this->broadcastChannelMessage(RPL_JOIN(user->getPrefix(), channel_name));
 		// 채널에 topic이 설정되어 있는 경우
@@ -31,11 +31,12 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 		// 구현해야 할 명령어 정리6RPL_NAMREPLY
 		// 현재 채널에 있는 user들의 이름 목록, 공백으로 구분하며 operator 앞에는 @ 붙음
 		// RPL_ENDOFNAMES
+		return ;
 
 	}
 	//------------------------------------------------------exist channel
 	//------------------------------------------------------error::client exceed max channel cnt
-	else if (user->checkChannelLimit() == -1)
+	if (user->checkChannelLimit() == -1)
 	{
 		this->sendMessage(ERR_TOOMANYCHANNELS(user->getNickname(), "JOIN"), fd);
 		return ;
@@ -144,6 +145,7 @@ void	Server::commandNick(std::vector<std::string> token, int fd)
 	user = this->searchClient(fd);
 	if (user != NULL)
 	{
+		this->sendMessage(RPL_NICK(user->getPrefix(), token[1]), fd);
 		user->setNickname(token[1]);
 		return;
 	}
@@ -174,12 +176,12 @@ void	Server::commandPing(std::vector<std::string> token, Client * user,  int fd)
 
 void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 	if (token.size() == 1) {
-		sendMessage(ERR_NEEDMOREPARAMS(user->getPrefix(), token[0]), fd);
+		this->sendMessage(ERR_NEEDMOREPARAMS(user->getPrefix(), token[0]), fd);
 		return ;
 	}
 	Channel *channel = searchChannel(token[1]);
 	if (channel == NULL) {
-		sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
+		this->sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
 	}
 	// 요청한 클라이언트가 해당 채널에 존재하는지 확인
 	// 클라이언트에 메소드 추가
@@ -187,16 +189,16 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 	// }
 	else if (token.size() == 2) {
 		std::vector<std::string> *mode_params = channel->getChannelModeParams();
-		sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
+		this->sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
 	}
 	else {
 		try {
 			std::vector<std::string> *mode_params = channel->setChannelMode(token, user);
 			if (mode_params) {
-				broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]));
+				this->broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]));
 			}
 		} catch (std::exception &e) {
-			sendMessage(e.what(), fd);
+			this->sendMessage(e.what(), fd);
 		}
 	}
 }

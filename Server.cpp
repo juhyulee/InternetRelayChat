@@ -209,7 +209,7 @@ void Server::parsingData(int fd) { //읽음
 			else if (tokenizer[0] == "NICK") {commandNick(tokenizer, fd);}
 			else if (tokenizer[0] == "USER") {commandUser(tokenizer, fd);}
 			user = this->searchTemp(fd);
-			if (this->getAuth(user) == true)
+			if (user && this->getAuth(user) == true)
 			{
 				this->_temp_list.erase(fd);
 				this->addUserList(fd, user);
@@ -227,11 +227,11 @@ void Server::parsingData(int fd) { //읽음
 			}
 			if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, user, fd);}
 			else if (tokenizer[0] == "PING") {commandPing(tokenizer, user, fd);}
-			// else if (tokenizer[0] == "QUIT") {}
+			// else if (tokenizer[0] == "QUIT") {commandQuit(tokenizer, user, fd);}
 			// else if (tokenizer[0] == "TOPIC") {}
 			// else if (tokenizer[0] == "INVITE") {}
 			// else if (tokenizer[0] == "KICK") {}
-			// else if (tokenizer[0] == "MODE") {}
+			else if (tokenizer[0] == "MODE") {commandMode(tokenizer, user, fd);}
 		}
 		
 	}

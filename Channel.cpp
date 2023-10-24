@@ -339,13 +339,15 @@ void	Channel::clearChannelOperator(){
 //-------------------------------------------------------------------------------->>
 
 bool	Channel::isChannelUser(Client *client) { // 유저 목록에 있는지 확인
-	if (_user_list.find(client->getSocketFd()) != _user_list.end()) {
-		return true;
+	std::map<int, Client *> ::iterator iter = _user_list.begin();
+	for (iter ; iter != _user_list.end(); iter++){
+		if (iter->second == client)
+			return true ;
 	}
 	return false;
 }
 
-Client	*Channel::findChannelUser(std::string nickname) {
+Client	*Channel::findChannelUser(std::string nickname) { // 유저 목록에서 찾아서 유저 리턴 / 없을경우 NULL
 	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
 	iter != _user_list.end(); iter++) {
 		if (iter->second->getNickname() == nickname)
@@ -354,7 +356,18 @@ Client	*Channel::findChannelUser(std::string nickname) {
 	return NULL;
 }
 
+Client	*Channel::findChannelUser(Client *client) { // 유저 목록에서 찾아서 유저 리턴 / 없을경우 NULL
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+	iter != _user_list.end(); iter++) {
+		if (iter->second == client)
+			return iter->second;
+	}
+	return NULL;
+}
+
+
 bool	Channel::addChannelUser(Client *client){  //유저 채널에 추가하는 함수
+	Client *user = findChannelUser(client);
 	if (isChannelUser(client) == false) {
 		_user_list.insert(std::make_pair(client->getSocketFd(), client));
 		return true;

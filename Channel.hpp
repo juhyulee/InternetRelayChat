@@ -61,7 +61,8 @@ class Channel {
 
 		// User
 		bool	isChannelUser(Client *client);				// 유저 목록에 있는지 확인
-		Client	*findChannelUser(std::string nickname);	// 유저 목록에서 검색
+		Client	*findChannelUser(std::string nickname);
+		Client	*findChannelUser(Client *client);			// 유저 목록에서 검색
 		bool	addChannelUser(Client *client);				// 유저 목록에 추가
 		bool	removeChannelUser(Client *client);			// 유저 목록에서 지우기
 		void	clearUserList();
