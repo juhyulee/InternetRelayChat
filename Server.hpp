@@ -68,6 +68,13 @@ class Server {
 		void	commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd);//수도코드
 		// void	commandMode(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		//prvmsg
+		void	commandMode(std::vector<std::string> token, Client *user, int fd);
+
+		//구현전 - 매개변수 임의로 넣어둠
+		// void	commandQuit(std::vector<std::string> token, int paramcnt, Client * user, int fd);
+		// void	commandTopic(std::vector<std::string> token, int paramcnt, Client * user, int fd);
+		// void	commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd);
+		// void	commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 
 	private :
 		int							_server_socket;

@@ -1,4 +1,6 @@
 #include "Server.hpp"
+#include "message.h"
+#include <vector>
 
 //10.11.3.2
 //irssi -c 10.28.3.5 -p 8080 -w 1234 -n juhyulee
@@ -206,14 +208,11 @@ void Server::parsingData(int fd) { //읽음
 		else if (tokenizer[0] == "USER") {commandUser(tokenizer, paramcnt, user, fd);}
 		else if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, paramcnt, user, fd);}
 		else if (tokenizer[0] == "PING") {commandPing(tokenizer, paramcnt, user, fd);}
-		// else if (tokenizer[0] == "OPER") {}
 		// else if (tokenizer[0] == "QUIT") {}
 		// else if (tokenizer[0] == "TOPIC") {}
-		// else if (tokenizer[0] == "LIST") {}
 		// else if (tokenizer[0] == "INVITE") {}
 		// else if (tokenizer[0] == "KICK") {}
 		// else if (tokenizer[0] == "MODE") {}
-		// else {}
 	}
 	if (check_auth)
 	{
@@ -238,10 +237,10 @@ Channel	*Server::makeChannel(std::string channel_name, Client *client) {
 }
 
 void	Server::deleteChannel(Channel **channel) {
-	(*channel)->getChannelMode().clear();
-	(*channel)->getUserList().clear();
-	(*channel)->getInviteList().clear();
-	(*channel)->getChannelOperator().clear();
+	(*channel)->clearChannelMode();
+	(*channel)->clearUserList();
+	(*channel)->clearInviteList();
+	(*channel)->clearChannelOperator();
 	delete (*channel);
 	(*channel) = NULL;
 }
