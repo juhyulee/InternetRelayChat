@@ -26,30 +26,30 @@ class Server {
 
 		// Server
 		void	serverInit(int argc, char **argv);
-		void	changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident, \
+		void	changeEvents(std::vector<struct kevent>& change_list, uintptr_t ident,
 				int16_t filter, uint16_t flags, uint32_t fflags, intptr_t data, void *udata);
 		void	disconnectClient(int client_fd,	std::map<int, std::string>	clients);
 		void	parsingData(int fd);
 
 		// Channel
-		Channel	*makeChannel(std::string channel_name, Client *client);										// 채널 객체 생성
-		void	deleteChannel(Channel **Channel);									// 채널 객체 삭제
-		Channel	*searchChannel(std::string channel_name);									// 채널 검색
+		Channel	*makeChannel(std::string channel_name, Client *client);	// 채널 객체 생성
+		void	deleteChannel(Channel **Channel);						// 채널 객체 삭제
+		Channel	*searchChannel(std::string channel_name);				// 채널 검색
 
 		// Message
-		void	sendMessage(std::string message, int fd);									// 메세지 보내기
+		void	sendMessage(std::string message, int fd);						// 메세지 보내기
 		void	broadcastChannelMessage(std::string message);					// 채널에 메세지 보내기 (본인 포함)
-		void	broadcastChannelMessage(std::string message, int socket_fd);				// 채널에 메세지 보내기 (본인 제외)
+		void	broadcastChannelMessage(std::string message, int socket_fd);	// 채널에 메세지 보내기 (본인 제외)
 
 		// Command
-		void	handleCommand(std::string command, int fd);									// 명령어 처리
+		void	handleCommand(std::string command, int fd);								// 명령어 처리
 		void	pong(void);
-		void	kickUser(std::string channel_name, std::vector<std::string> param);			// 유저 강퇴
-		void	inviteUser(std::string channel_name, std::vector<std::string> param);		// 유저 초대
+		void	kickUser(std::string channel_name, std::vector<std::string> param);		// 유저 강퇴
+		void	inviteUser(std::string channel_name, std::vector<std::string> param);	// 유저 초대
 
-		Client	*searchClient(std::string nickname);										// 유저 검색
-		Client	*searchClient(int fd);										// 유저 검색
-		bool	getAuth(Client *user);														// 인증
+		Client	*searchClient(std::string nickname);									// 유저 검색
+		Client	*searchClient(int fd);													// 유저 검색
+		bool	getAuth(Client *user);													// 인증
 		bool	getAuth(int fd);
 
 
@@ -59,13 +59,15 @@ class Server {
 		void	commandUser(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		void	commandJoin(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		void	commandPing(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		void	commandMode(std::vector<std::string> token, Client *user, int fd);
+		void	commandPart(std::vector<std::string> token, Client * user, int fd);
 
 		//구현전 - 매개변수 임의로 넣어둠
-		// void	commandQuit(std::vector<std::string> token, int paramcnt, Client * user, int fd);
 		// void	commandTopic(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		// void	commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		// void	commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd);
+		// void	commandQuit(std::vector<std::string> token, Client * user, int fd);
+		void	commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd);	// 수도코드
+		void	commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd);	// 수도코드
+		void	commandMode(std::vector<std::string> token, Client *user, int fd);
+		//prvmsg
 
 	private :
 		int							_server_socket;

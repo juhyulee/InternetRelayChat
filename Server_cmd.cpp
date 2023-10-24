@@ -1,6 +1,5 @@
 #include "util.h"
 #include "Server.hpp"
-#include "Client.hpp"
 
 //int Client::checkLimit == -1  : 유저가 가입할 수 있는 최대 채널 갯수 초과 체크
 //int Channel::checkUserLimit == -1  : 채널에 가입할 수 있는 최대 인원 초과 체크
@@ -64,11 +63,7 @@ void	Server::commandJoin(std::vector<std::string> token, int paramcnt, Client * 
 		this->broadcastChannelMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
 	}
 	return ;
-
-
-
 }
-
 
 void	Server::commandUser(std::vector<std::string> token, int paramcnt, Client * user, int fd)
 {
@@ -110,8 +105,6 @@ void	Server::commandPass(std::vector<std::string> token, int paramcnt, Client * 
 	return ;
 };
 
-
-
 void	Server::commandNick(std::vector<std::string> token, int paramcnt, Client * user, int fd)
 {
 	if (paramcnt != 1){
@@ -122,7 +115,6 @@ void	Server::commandNick(std::vector<std::string> token, int paramcnt, Client * 
 
 };
 
-
 void	Server::commandPing(std::vector<std::string> token, int paramcnt, Client * user, int fd)
 {
 	std::cout << "check pong" << RPL_PONG(user->getPrefix(), token[1]) << std::endl;
@@ -132,6 +124,48 @@ void	Server::commandPing(std::vector<std::string> token, int paramcnt, Client * 
 	else{
 		this->sendMessage(RPL_PONG(user->getPrefix(), token[1]), fd);
 	}
+}
+
+void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) {
+	if (token.size() != 2)
+		return ;
+	broadcastChannelMessage(RPL_QUIT(user->getNickname(), ": from this channel"), fd);
+	Channel * temp = searchChannel(token[1]);
+	temp->removeChannelUser(user);
+}
+
+void	Server::commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd) {
+	//invite nickname #channel - 파라미터
+	//정상 실행 시
+		//해당 유저 인바이트 리스트에 추가
+		//RPL_INVITE(user, nick, channel)
+	//닉네임이 없는 경우
+		//ERR_NOSUCHNICK(user, nick)
+	//없는 채널일 경우
+		//ERR_NOSUCHCHANNEL(user, channel)
+	//오퍼레이터가 아닌 경우
+		//ERR_CHANOPRIVSNEEDED(user, channel)
+	//채널에 없는 유저가 보낸 경우
+		//ERR_NOTONCHANNEL(user, channel)
+	//이미 채널에 있는 유저일경우
+		//ERR_USERONCHANNEL(user, nick, channel)
+}
+
+void	Server::commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd) {
+	//kick #channel nickname - 파라미터
+	//정살 실행시 해당 채널에 broadcast
+	//닉네임이 없는 경우
+		//ERR_NOSUCHNICK(user, nick)
+	//없는 채널일 경우
+		//ERR_NOSUCHCHANNEL(user, channel)
+	//채널에 없는 유저가 실행했을 경우
+		//ERR_NOTONCHANNEL(user, channel)
+	//채널에 없는 유저를 kick한 경우
+		//ERR_USERNOTINCHANNEL(user, nick, channel)
+	//오퍼레이터가 아닌데 오퍼레이터를 강퇴시킨경우
+		//ERR_CHANOPRIVSNEEDED(user, channel)
+	//오퍼레이터가 방에 없는 경우 -? 이건 뭔소리고
+		//ERR_CHANOPRIVSNEEDED2(user, channel)
 }
 
 void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {

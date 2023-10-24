@@ -177,6 +177,9 @@ void Server::parsingData(int fd) { //읽음
 			token.push_back(line);
 			_clients[fd].erase(0, pos + 2);
 		}
+		else {
+			break;
+		}
 	}
 	Client *user = this->searchClient(fd);
 	if (!user)
