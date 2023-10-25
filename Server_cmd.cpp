@@ -223,45 +223,23 @@ void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) 
 	}
 	ch->removeChannelUser(user);
 	broadcastChannelMessage(RPL_PART(user->getPrefix(), token[1]), ch);
-	// while (1) {
-	// 	std::cin >> b;
-	// 	int a = std::stoi(b);
-	// 	switch (a) {
-	// 		case 11 :
-	// 			sendMessage(RPL_PART(user->getPrefix(), token[1]), fd);
-	// 			break;
-	// 		case 21 :
-	// 			broadcastChannelMessage(RPL_PART(user->getPrefix(), token[1]), ch); //##
-	// 			break;
-	// 		case 13 :
-	// 			sendMessage(RPL_QUIT(user->getPrefix(), "from this channel"), fd);
-	// 			break;
-	// 		case 23 :
-	// 			broadcastChannelMessage(RPL_QUIT(user->getPrefix(), "from this channel"), ch, fd);
-	// 			break;
-	// 		case 100 :
-	// 			return;
-	// 		default:
-	// 			break;
-	// 	}
-	// }
-
-	// broadcastChannelMessage(RPL_QUIT(user->getPrefix(), token[1]), ch, fd);// ??
 }
 
 
-// void	Server::commandPrivmsg(std::vector<std::string> token, Client * user, int fd){
-// 	if (token.size() <= 1){
-// 		std::cout << "privmsg error from " << user->getNickname() << std::endl;
-// 		return;
-// 	}
-// 	Channel *ch = searchChannel(token[1]);
-// 	if (ch){
-// 		for (std::map <int, Client* >::iterator iter = ch->getUserList().begin(); \
-// 		iter != ch->getUserList().end() ; iter++)
-// 			sendMessage(RPL_PRIVMSG(user->getNickname(), token[1], token[2]), iter->first);
-// 	}
-// }
+void	Server::commandPrivmsg(std::vector<std::string> token, Client * user, int fd){
+	if (token.size() != 3 ){
+		sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), token[0]), fd);
+		std::cout << "privmsg error from " << user->getNickname() << std::endl;
+		return;
+	}
+	Channel *ch = searchChannel(token[1]);
+	if (!ch)
+		sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
+	if (ch->isChannelUser(user) == false){
+		sendMessage(ERR_USERNOTINCHANNEL(user->getPrefix(), user->getNickname(), token[1]), fd);
+	}
+	broadcastChannelMessage(RPL_PRIVMSG(user->getNickname(), token[1], token[2]), ch, fd);
+}
 
 // void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){
 	//invite nickname #channel - 파라미터

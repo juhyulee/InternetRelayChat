@@ -232,7 +232,7 @@ void Server::parsingData(int fd) { //읽음
 			if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, user, fd);}
 			else if (tokenizer[0] == "PING") {commandPing(tokenizer, user, fd);}
 			else if (tokenizer[0] == "PART") {commandPart(tokenizer, user, fd);}
-			// else if (tokenizer[0] == "PRIVMSG") {commandPrivmsg(tokenizer, user, fd);}
+			else if (tokenizer[0] == "PRIVMSG") {commandPrivmsg(tokenizer, user, fd);}
 			// else if (tokenizer[0] == "QUIT") {}
 			// else if (tokenizer[0] == "TOPIC") {}
 			// else if (tokenizer[0] == "INVITE") {}
