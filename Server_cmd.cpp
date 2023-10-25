@@ -28,6 +28,10 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 		if (ch->getChannelTopic() != ""){
 			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
 		}
+		for (std::map <int, Client *> ::const_iterator iter = ch->getUserList().begin(); \
+			iter != ch->getUserList().end(); iter++)
+			//:irc.example.com 353 alice = #ircv3 :alice @dan
+			sendMessage(RPL_NAMREPLY(user->getNickname(), "=", ch->getChannelName(), iter->second->getNickname()), fd);
 		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
 		// 채널에 topic이 설정되어 있는 경우
 		// RPL_TOPIC
@@ -222,6 +226,7 @@ void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) 
 		return ;
 	}
 	ch->removeChannelUser(user);
+	// std::cout <<"###" << RPL_PART(user->getPrefix(), token[1]) << std::endl;
 	broadcastChannelMessage(RPL_PART(user->getPrefix(), token[1]), ch);
 }
 
