@@ -97,6 +97,7 @@ const std::map<int, Client *>&	Channel::getUserList() const{
 	return _user_list;
 }
 
+
 const std::map<int, Client *>&	Channel::getInviteList() const{
 	return _invite_list;
 }
@@ -340,11 +341,8 @@ void	Channel::clearChannelOperator(){
 //-------------------------------------------------------------------------------->>
 
 bool	Channel::isChannelUser(Client *client) { // 유저 목록에 있는지 확인
-	for (std::map<int, Client *> ::iterator iter = _user_list.begin()\
-	; iter != _user_list.end(); iter++){
-		if (iter->second == client)
+	if (_user_list.find(client->getSocketFd()) != _user_list.end())
 			return true ;
-	}
 	return false;
 }
 

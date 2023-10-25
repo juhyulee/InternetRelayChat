@@ -39,8 +39,8 @@ class Server {
 
 		// Message
 		void	sendMessage(std::string message, int fd);									// 메세지 보내기
-		void	broadcastChannelMessage(std::string message);					// 채널에 메세지 보내기 (본인 포함)
-		void	broadcastChannelMessage(std::string message, int socket_fd);				// 채널에 메세지 보내기 (본인 제외)
+		void	broadcastChannelMessage(std::string message, Channel *ch);					// 채널에 메세지 보내기 (본인 포함)
+		void	broadcastChannelMessage(std::string message, Channel *ch, int socket_fd);				// 채널에 메세지 보내기 (본인 제외)
 
 		// Command
 		void	handleCommand(std::string command, int fd);									// 명령어 처리
@@ -62,6 +62,7 @@ class Server {
 		void	commandJoin(std::vector<std::string> token, Client * user, int fd);
 		//구현전 - 매개변수 임의로 넣어둠
 		void	commandPart(std::vector<std::string> token, Client * user, int fd);
+		void	commandPrivmsg(std::vector<std::string> token, Client * user, int fd);
 		// void	commandQuit(std::vector<std::string> token, Client * user, int fd);
 		// void	commandTopic(std::vector<std::string> token, Client * user, int fd);
 		// void	commandList(std::vector<std::string> token, Client * user, int fd);

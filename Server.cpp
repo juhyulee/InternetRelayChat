@@ -118,7 +118,7 @@ void Server::serverInit(int argc, char **argv) {
 					else {
 						buf[n] = '\0';
 						_clients[_curr_event->ident] += buf;
-						std::cout << "received data from " << _curr_event->ident << ": " << _clients[_curr_event->ident] << std::endl;
+						std::cout << "msg from " << _curr_event->ident << ":\n" << _clients[_curr_event->ident] << std::endl;
 						parsingData(_curr_event->ident);
 						//===================parsing==============================
 						if (!_send_data[_curr_event->ident].empty()) {
@@ -133,7 +133,7 @@ void Server::serverInit(int argc, char **argv) {
 				if (it != _clients.end()) {
 					if (!_send_data[_curr_event->ident].empty()) {//ㄴㅐ가 보보내내는는거
 						int n;
-						std::cout << "send data from" << _curr_event->ident << ": " << _send_data[_curr_event->ident] << std::endl;
+						// std::cout << "send data from" << _curr_event->ident << ": " << _send_data[_curr_event->ident] << std::endl;
 						if ((n = send(_curr_event->ident, _send_data[_curr_event->ident].c_str(), _send_data[_curr_event->ident].size(), 0) == -1)) {
 							std::cerr << "client write error!" << std::endl;
 							disconnectClient(_curr_event->ident, _clients);
@@ -190,11 +190,14 @@ void Server::parsingData(int fd) { //읽음
 			line = _clients[fd].substr(0, pos + 2);
 			token.push_back(line);
 			_clients[fd].erase(0, pos + 2);
+			std::cout << "token : " << line << std::endl;
 		}
 		else {
+			std::cout << "parsing ERR" << std::endl;
 			break;
 		}
 	}
+			std::cout << "parsing....." << std::endl;
 	for (size_t i = 0; i < token.size();i++) {
 		std::istringstream input_str(token[i]);
 		std::string word;
@@ -229,6 +232,7 @@ void Server::parsingData(int fd) { //읽음
 			if (tokenizer[0] == "JOIN") {commandJoin(tokenizer, user, fd);}
 			else if (tokenizer[0] == "PING") {commandPing(tokenizer, user, fd);}
 			else if (tokenizer[0] == "PART") {commandPart(tokenizer, user, fd);}
+			// else if (tokenizer[0] == "PRIVMSG") {commandPrivmsg(tokenizer, user, fd);}
 			// else if (tokenizer[0] == "QUIT") {}
 			// else if (tokenizer[0] == "TOPIC") {}
 			// else if (tokenizer[0] == "INVITE") {}
@@ -274,20 +278,24 @@ Channel	*Server::searchChannel(std::string channel_name) {
 
 void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
 	_send_data[fd] += message;
+	std::cout << "msg to " << fd << ":\n" << message << std::endl; 
 	//changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
 }
 
-void Server::broadcastChannelMessage(std::string message) {
-	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
-		iter != _user_list.end(); ++iter) {
+void Server::broadcastChannelMessage(std::string message, Channel *ch) {
+	std::cout <<"broadcasting " << std::endl;
+	for (std::map<int, Client *>::const_iterator iter = ch->getUserList().begin(); \
+		iter != ch->getUserList().end(); ++iter) {
 		sendMessage(message, iter->second->getSocketFd());
 	}
 }
 
-void Server::broadcastChannelMessage(std::string message, int socket_fd) {
-	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
-		iter != _user_list.end(); ++iter) {
+void Server::broadcastChannelMessage(std::string message, Channel *ch, int socket_fd) {
+	std::cout <<"broadcasting except " << socket_fd << std::endl;
+	for (std::map<int, Client *>::const_iterator iter = ch->getUserList().begin(); \
+		iter != ch->getUserList().end(); ++iter) {
 		if (iter->first != socket_fd) {
+			std::cout <<  iter->first << "except " << socket_fd << std::endl;
 			sendMessage(message, iter->second->getSocketFd());
 		}
 	}

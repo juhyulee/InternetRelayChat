@@ -21,10 +21,13 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	Channel *ch = this->searchChannel(channel_name);
 	//------------------------------------------------------success::new channel
 	if (!ch){
+		std::cout << "new channel made : " << token[1] << std::endl;
 		ch = makeChannel(token[1], user);
 		// 채널에 있는 모든 유저들에게 broadcast RPL_JOIN ok
 		this->sendMessage(RPL_JOIN(user->getNickname(), channel_name),fd);
-		this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
+		if (ch->getChannelTopic() != ""){
+			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
+		}
 		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
 		// 채널에 topic이 설정되어 있는 경우
 		// RPL_TOPIC
@@ -55,12 +58,14 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	//------------------------------------------------------Success:: exist channel
 	else {
 		ch->addChannelUser(user);
+		std::cout << "exist channel enter : " << token[1] <<"\nthis channel now has " << ch->getUserCount() << std::endl;
 		this->sendMessage(RPL_JOIN(user->getNickname(), channel_name),fd);
+		this->broadcastChannelMessage(RPL_JOIN(user->getNickname(), channel_name), ch, fd);
 		if (ch->getChannelTopic() != ""){
 			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
 		}
 		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
-		this->broadcastChannelMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, user->getPrefix()), fd);
+		this->broadcastChannelMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, user->getPrefix()), ch, fd);
 	}
 	return ;
 
@@ -192,7 +197,8 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 		try {
 			std::vector<std::string> *mode_params = channel->setChannelMode(token, user);
 			if (mode_params) {
-				this->broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]));
+				this->broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), \
+				(*mode_params)[0], (*mode_params)[1]), channel);
 			}
 		} catch (std::exception &e) {
 			this->sendMessage(e.what(), fd);
@@ -202,11 +208,11 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 
 
 void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) {
-	std::cout << token.size() << std::endl;
+	// std::string b;
+	// std::cin >> b;
 	if (token.size() != 2)
 		return ;
 	Channel * ch = searchChannel(token[1]);
-	std::cout << ch << std::endl;
 	if (!ch){
 		sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
 		return ;
@@ -216,9 +222,46 @@ void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) 
 		return ;
 	}
 	ch->removeChannelUser(user);
-	sendMessage(RPL_PART(user->getPrefix(), token[1]), fd);
-	broadcastChannelMessage(RPL_QUIT(user->getNickname(), ": from this channel"));
+	broadcastChannelMessage(RPL_PART(user->getPrefix(), token[1]), ch);
+	// while (1) {
+	// 	std::cin >> b;
+	// 	int a = std::stoi(b);
+	// 	switch (a) {
+	// 		case 11 :
+	// 			sendMessage(RPL_PART(user->getPrefix(), token[1]), fd);
+	// 			break;
+	// 		case 21 :
+	// 			broadcastChannelMessage(RPL_PART(user->getPrefix(), token[1]), ch); //##
+	// 			break;
+	// 		case 13 :
+	// 			sendMessage(RPL_QUIT(user->getPrefix(), "from this channel"), fd);
+	// 			break;
+	// 		case 23 :
+	// 			broadcastChannelMessage(RPL_QUIT(user->getPrefix(), "from this channel"), ch, fd);
+	// 			break;
+	// 		case 100 :
+	// 			return;
+	// 		default:
+	// 			break;
+	// 	}
+	// }
+
+	// broadcastChannelMessage(RPL_QUIT(user->getPrefix(), token[1]), ch, fd);// ??
 }
+
+
+// void	Server::commandPrivmsg(std::vector<std::string> token, Client * user, int fd){
+// 	if (token.size() <= 1){
+// 		std::cout << "privmsg error from " << user->getNickname() << std::endl;
+// 		return;
+// 	}
+// 	Channel *ch = searchChannel(token[1]);
+// 	if (ch){
+// 		for (std::map <int, Client* >::iterator iter = ch->getUserList().begin(); \
+// 		iter != ch->getUserList().end() ; iter++)
+// 			sendMessage(RPL_PRIVMSG(user->getNickname(), token[1], token[2]), iter->first);
+// 	}
+// }
 
 // void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){
 	//invite nickname #channel - 파라미터
