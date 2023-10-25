@@ -279,7 +279,7 @@ Channel	*Server::searchChannel(std::string channel_name) {
 void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
 	_send_data[fd] += message;
 	std::cout << "msg to " << fd << ":\n" << message << std::endl; 
-	//changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
+	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
 }
 
 void Server::broadcastChannelMessage(std::string message, Channel *ch) {
