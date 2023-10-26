@@ -32,6 +32,7 @@ class Channel {
 		const std::map<int, Client *>&		getUserList() const;
 		const std::map<int, Client *>&		getInviteList() const;
 		const std::map<int, Client *>&		getChannelOperator() const;
+		const std::string 					getUserNameList();
 
 		// Setter
 		void 						setChannelName(std::string new_name);

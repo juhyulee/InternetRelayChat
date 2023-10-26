@@ -68,8 +68,8 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 		if (ch->getChannelTopic() != ""){
 			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
 		}
+		this->sendMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, ch->getUserNameList()), fd);
 		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
-		this->broadcastChannelMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, user->getPrefix()), ch, fd);
 	}
 	return ;
 
@@ -246,22 +246,45 @@ void	Server::commandPrivmsg(std::vector<std::string> token, Client * user, int f
 	broadcastChannelMessage(RPL_PRIVMSG(user->getNickname(), token[1], token[2]), ch, fd);
 }
 
-// void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){
-	//invite nickname #channel - 파라미터
-	//정상 실행 시
-		//해당 유저 인바이트 리스트에 추가
-		//RPL_INVITE(user, nick, channel)
-	//닉네임이 없는 경우
-		//ERR_NOSUCHNICK(user, nick)
-	//없는 채널일 경우
-		//ERR_NOSUCHCHANNEL(user, channel)
-	//오퍼레이터가 아닌 경우
-		//ERR_CHANOPRIVSNEEDED(user, channel)
-	//채널에 없는 유저가 보낸 경우
-		//ERR_NOTONCHANNEL(user, channel)
-	//이미 채널에 있는 유저일경우
-		//ERR_USERONCHANNEL(user, nick, channel)
-// }
+void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){
+	// invite nickname #channel - 파라미터
+	if (token.size() != 3 ){
+		sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), token[0]), fd);
+		return;
+	}
+	Channel	*ch = searchChannel(token[2]);
+	Client	*new_user = searchClient(token[1]);
+	// 없는 채널일 경우
+	if (!ch){
+		sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[2]), fd);
+	}
+	// 채널에 없는 유저가 보낸 경우
+	else if (ch->isChannelUser(user) == false){
+		sendMessage(ERR_NOTONCHANNEL(user->getNickname(), token[2]), fd);
+	}
+	// 오퍼레이터가 아닌 경우
+	else if (ch->isChannelOperator(user) == false){
+		sendMessage(ERR_CHANOPRIVSNEEDED(user->getNickname(), token[2]), fd);
+	}
+	// 닉네임이 없는 경우
+	else if (!user){
+		sendMessage(ERR_NOSUCHNICK(user->getNickname(), token[1]), fd);
+	}
+	// 이미 채널에 있는 유저일경우
+	else if (ch->isChannelUser(new_user) == true){
+		sendMessage(ERR_USERONCHANNEL(user->getNickname(), token[1], token[2]), fd);
+	}
+	// 이미 초대 목록에 있을 경우 - 커맨드 없음
+	else if (ch->isInvitedUser(new_user) == true){
+		std::cout << "already invited" <<std::endl;
+	}
+	// 정상실행 ::	해당 유저 인바이트 리스트에 추가
+	else{
+		ch->addInvitedUser(new_user);
+		sendMessage(RPL_INVITE(user->getNickname(), token[1], token[2]), fd);
+		sendMessage(RPL_INVITING(user->getNickname(), token[1], token[2]), fd);
+	}
+}
 // void	Server::commandKick(std::vector<std::string> token, Client * user, int fd){
 	//kick #channel nickname - 파라미터
 	//정살 실행시 해당 채널에 broadcast

@@ -106,6 +106,19 @@ const std::map<int, Client *>&	Channel::getChannelOperator() const{
 	return _operator;
 }
 
+const std::string Channel::getUserNameList() {
+	std::string res;
+	for (std::map <int, Client *> ::iterator iter = _user_list.begin();\
+	iter != _user_list.end(); iter++){
+		if (isChannelOperator(iter->second) == true){
+			res += "@";
+		}
+		res += iter->second->getNickname();
+		res += " ";
+	}
+	return (res);
+}
+
 //-------------------------------------------------------------------------------->>
 // Setter
 //-------------------------------------------------------------------------------->>
