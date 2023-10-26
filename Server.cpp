@@ -197,7 +197,7 @@ void Server::parsingData(int fd) { //읽음
 			break;
 		}
 	}
-			std::cout << "parsing....." << std::endl;
+			// std::cout << "parsing....." << std::endl;
 	for (size_t i = 0; i < token.size();i++) {
 		std::istringstream input_str(token[i]);
 		std::string word;
@@ -205,7 +205,7 @@ void Server::parsingData(int fd) { //읽음
 
 		while(input_str >> word) {
 			tokenizer.push_back(word);
-			std::cout << "words : " << word << std::endl;
+			// std::cout << "words : " << word << std::endl;
 		}
 		if (tokenizer[0] == "PASS" || tokenizer[0] == "NICK" || tokenizer[0] == "USER")
 		{

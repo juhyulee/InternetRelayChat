@@ -28,10 +28,7 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 		if (ch->getChannelTopic() != ""){
 			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
 		}
-		for (std::map <int, Client *> ::const_iterator iter = ch->getUserList().begin(); \
-			iter != ch->getUserList().end(); iter++)
-			//:irc.example.com 353 alice = #ircv3 :alice @dan
-			sendMessage(RPL_NAMREPLY(user->getNickname(), "=", ch->getChannelName(), iter->second->getNickname()), fd);
+		this->sendMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, ch->getUserNameList()), fd);
 		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
 		// 채널에 topic이 설정되어 있는 경우
 		// RPL_TOPIC
@@ -64,7 +61,7 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 		ch->addChannelUser(user);
 		std::cout << "exist channel enter : " << token[1] <<"\nthis channel now has " << ch->getUserCount() << std::endl;
 		this->sendMessage(RPL_JOIN(user->getNickname(), channel_name),fd);
-		this->broadcastChannelMessage(RPL_JOIN(user->getNickname(), channel_name), ch, fd);
+		this->broadcastChannelMessage(RPL_JOIN(user->getPrefix(), channel_name), ch, fd);
 		if (ch->getChannelTopic() != ""){
 			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
 		}
@@ -171,7 +168,7 @@ void	Server::commandNick(std::vector<std::string> token, int fd)
 
 void	Server::commandPing(std::vector<std::string> token, Client * user,  int fd)
 {
-	std::cout << "check pong" << RPL_PONG(user->getPrefix(), token[1]) << std::endl;
+	// std::cout << "check pong" << RPL_PONG(user->getPrefix(), token[1]) << std::endl;
 	if (token.size() != 2){
 		this->sendMessage(ERR_NOORIGIN(user->getNickname()), fd);
 	}
