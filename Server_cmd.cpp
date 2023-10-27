@@ -299,42 +299,52 @@ void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd
 
 // }
 
-// void	Server::commandTopic(std::vector<std::string> token, Client * user, int fd) {
-// 	if (token.size() == 2) { //토픽이 뭔지 표시해줘
-// 		//토픽이 없는경우
-// 		Channel * temp = searchChannel(token[1]);
-// 		if (!temp) {
-// 			sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), temp->getChannelName()), fd);
-// 		}
-// 		std::string temptopic = temp->getChannelTopic();
-// 		if (temptopic.empty())
-// 			sendMessage(RPL_NOTOPIC(user->getNickname(), temp->getChannelName()), fd);
-// 			//rpl_notopic
-// 		else {
-// 			sendMessage(RPL_TOPIC(user->getNickname(), temp->getChannelName(), temp->getChannelTopic()),fd);
-// 			//rpl_topic
-// 			//rpl_topicwhotime
-// 		}
-// 	}
+void	Server::commandTopic(std::vector<std::string> token, Client * user, int fd) {
+	if (token.size() == 2) { //topic : view
+		Channel * ch = searchChannel(token[1]);
+		if (!ch) {
+			sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
+		}
+		std::string topic = ch->getChannelTopic();
+		if (topic == "" )
+			sendMessage(RPL_NOTOPIC(user->getNickname(), token[1]), fd);
+		else {
+			sendMessage(RPL_TOPIC(user->getNickname(), token[1], temp->getChannelTopic()),fd);
+		}
+	}
 
-// 	else if (token.size() == 3) { //토픽 설정해줘
-// 		//채널 모드 확인
-// 			//모드가 있으면 오퍼레이터인지 확인
-// 				//오퍼레이터면 rpl_my_topic_boradcast
-// 				//오퍼레이터가 아니면 err_chanoprivsneeded
-// 			//모드가 없으면 그냥 설정
-// 				//rpl_my_topic broadcast
-// 		//없는 채널일 경우
-// 			//err_nosuchchannel
-// 		//채널에 없는 유저가 변경시도
-// 			//err_notochannel
-// 	}
-// 	else { //인자 이상함
-// 		sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), token[0]), fd);
-// 		//err_neednoreparams
-// 	}
-// }
+	// else if (token.size() == 3) { //토픽 설정해줘
+	// 	//채널 모드 확인
+	// 		//모드가 있으면 오퍼레이터인지 확인
+	// 			//오퍼레이터면 rpl_my_topic_boradcast
+	// 			//오퍼레이터가 아니면 err_chanoprivsneeded
+	// 		//모드가 없으면 그냥 설정
+	// 			//rpl_my_topic broadcast
+	// 	//없는 채널일 경우
+	// 		//err_nosuchchannel
+	// 	//채널에 없는 유저가 변경시도
+	// 		//err_notochannel
+	// }
+	// else { //인자 이상함
+	// 	sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), token[0]), fd);
+	// }
+}
 
-// void	commandQuit(std::vector<std::string> token, Client * user, int fd) {
-// 	//같은 채널에 있는 다른 클라이언트한테 메세지 전송
-// }
+//ㅌㅔ스트안해봄
+void	Server::commandQuit(std::vector<std::string> token, Client * user, int fd){
+	std::string msg = user->getNickname(); 
+	if (token.size() == 2)
+		msg = token[1];
+	else if(token.size() != 1){
+		sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), "QUIT"), fd);
+	}
+	Channel *ch;
+	for (std::map<std::string, Channel *>::iterator iter = _channel_list.begin(); \
+		iter != _channel_list.end(); iter++){
+			ch = iter->second;
+			if (ch->isChannelUser(user) == true)
+				broadcastChannelMessage(RPL_QUIT(user->getPrefix(), msg), ch, fd);
+		}
+	sendMessage(ERR_QUIT(user->getPrefix(), msg), fd);
+	disconnectClient(fd, this->_clients);
+}
