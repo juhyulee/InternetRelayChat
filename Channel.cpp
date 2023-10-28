@@ -286,6 +286,13 @@ void	Channel::clearChannelMode(){
 	_mode.clear();
 }
 
+bool Channel::checkChannelMode(char c)
+{
+	if (_mode.find(c) == _mode.end())
+		return false;
+	return true;
+}
+
 std::vector<std::string>	*Channel::getChannelModeParams() const{
 	std::vector<std::string>	*mode_params = new std::vector<std::string>;
 	std::string 				modes;
@@ -358,6 +365,16 @@ bool	Channel::isChannelUser(Client *client) { // 유저 목록에 있는지 확�
 			return true ;
 	return false;
 }
+
+bool	Channel::isChannelUser(std::string nickname) { // 유저 목록에 있는지 확인
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+	iter != _user_list.end(); iter++) {
+		if (iter->second->getNickname() == nickname)
+			return true;
+	}
+	return false;
+}
+
 
 Client	*Channel::findChannelUser(std::string nickname) { // 유저 목록에서 찾아서 유저 리턴 / 없을경우 NULL
 	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
