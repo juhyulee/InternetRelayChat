@@ -43,10 +43,10 @@
 # define RPL_CHANNELCREATETIME(user, channel, date) "329 " + user + " " + channel + " :" + date + "\r\n"
 # define RPL_ENDOFBANLIST(user, channel) "368 " + user + " " + channel + " :End of channel ban list" + "\r\n"
 // command
-// origin 
+// origin
 // # define RPL_QUIT(user, message) ":" + user + " QUIT :Quit: " + message + "\r\n"
 # define RPL_QUIT(user, message) ":" + user + " QUIT :" + message + "\r\n"
-# define RPL_PONG(user, ping) ":" + user + " PONG :" + ping
+# define RPL_PONG(user, ping) ":" + user + " PONG :" + ping + "\r\n"
 # define RPL_JOIN(user, channel) ":" + user + " JOIN :" + channel + "\r\n"
 # define RPL_PRIVMSG(user, target, msg) ":" + user + " PRIVMSG " + target + " " + msg + "\r\n"
 # define RPL_MY_TOPIC(user, channel, topic) ":" + user + " TOPIC " + channel + " " + topic + "\r\n"
