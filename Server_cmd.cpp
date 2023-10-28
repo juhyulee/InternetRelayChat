@@ -7,13 +7,19 @@
 
 // token 인자 중 합쳐서 string 만드는 것들 합쳐서 돌려주는 함수
 std::string getTotalMessage(size_t start, std::vector<std::string> token){
-	std::string topic = "";
-	if (start > token.size())
-		return topic ;
-	for (size_t i = start; i < token.size() - 1; i++){
+	std::string	topic = "";
+	size_t		tokensize = token.size();
+	if (start > tokensize)
+		return topic;
+	if (token[start][0] == ':')
+		token[start] = &(token[start][1]);
+	for (size_t i = start; i < tokensize - 1; i++){
 			topic += token[i];
 			topic += " ";
 		}
+	topic += token[tokensize - 1];
+	if (topic == ":")
+		return "";
 	return topic;
 }
 
@@ -35,12 +41,12 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	if (!ch){
 		std::cout << "new channel made : " << token[1] << std::endl;
 		ch = makeChannel(token[1], user);
-		this->sendMessage(RPL_JOIN(user->getNickname(), channel_name),fd);
+		this->sendMessage(RPL_JOIN(user->getPrefix(), channel_name),fd);
 		if (ch->getChannelTopic() != ""){
-			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
+			this->sendMessage(RPL_TOPIC(user->getPrefix(), channel_name, ch->getChannelTopic()), fd);
 		}
-		this->sendMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, ch->getUserNameList()), fd);
-		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
+		this->sendMessage(RPL_NAMREPLY(user->getPrefix(), "=", channel_name, ch->getUserNameList()), fd);
+		this->sendMessage(RPL_ENDOFNAMES(user->getPrefix(), channel_name), fd);
 		return ;
 
 	}
@@ -65,13 +71,13 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	else {
 		ch->addChannelUser(user);
 		std::cout << "exist channel enter : " << token[1] <<"\nthis channel now has " << ch->getUserCount() << std::endl;
-		this->sendMessage(RPL_JOIN(user->getNickname(), channel_name),fd);
+		this->sendMessage(RPL_JOIN(user->getPrefix(), channel_name),fd);
 		this->broadcastChannelMessage(RPL_JOIN(user->getPrefix(), channel_name), ch, fd);
 		if (ch->getChannelTopic() != ""){
-			this->sendMessage(RPL_TOPIC(user->getNickname(), channel_name, ch->getChannelTopic()), fd);
+			this->sendMessage(RPL_TOPIC(user->getPrefix(), channel_name, ch->getChannelTopic()), fd);
 		}
-		this->sendMessage(RPL_NAMREPLY(user->getNickname(), "=", channel_name, ch->getUserNameList()), fd);
-		this->sendMessage(RPL_ENDOFNAMES(user->getNickname(), channel_name), fd);
+		this->sendMessage(RPL_NAMREPLY(user->getPrefix(), "=", channel_name, ch->getUserNameList()), fd);
+		this->sendMessage(RPL_ENDOFNAMES(user->getPrefix(), channel_name), fd);
 	}
 	return ;
 
@@ -218,23 +224,29 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 	}
 }
 
-
+//PART(0) #ch(1) msg(2~)
 void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) {
-	if (token.size() != 2)
+	if (token.size() == 1){
 		sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), token[0]), fd);
 		return ;
+
+	}
 	Channel * ch = searchChannel(token[1]);
 	if (!ch){
 		sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
 		return ;
 	}
+	std::string msg = "";
+	if (token.size() > 2)
+		msg = getTotalMessage(2, token);
 	if (ch->isChannelUser(user) == false){
 		sendMessage(ERR_NOTONCHANNEL(user->getNickname(), token[1]), fd);
 		return ;
 	}
 	ch->removeChannelUser(user);
-	// std::cout <<"###" << RPL_PART(user->getPrefix(), token[1]) << std::endl;
+	sendMessage(RPL_PART(user->getPrefix(), token[1]), fd);
 	broadcastChannelMessage(RPL_PART(user->getPrefix(), token[1]), ch);
+	// std::cout <<"###" << RPL_PART(user->getPrefix(), token[1]) << std::endl;
 }
 
 
@@ -248,9 +260,9 @@ void	Server::commandPrivmsg(std::vector<std::string> token, Client * user, int f
 	if (!ch)
 		sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
 	if (ch->isChannelUser(user) == false){
-		sendMessage(ERR_USERNOTINCHANNEL(user->getPrefix(), user->getNickname(), token[1]), fd);
+		sendMessage(ERR_NOTONCHANNEL(user->getPrefix(), user->getNickname()), fd);
 	}
-	broadcastChannelMessage(RPL_PRIVMSG(user->getNickname(), token[1], token[2]), ch, fd);
+	broadcastChannelMessage(RPL_PRIVMSG(user->getPrefix(), token[1], token[2]), ch, fd);
 }
 
 void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd){
@@ -288,8 +300,8 @@ void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd
 	// 정상실행 ::	해당 유저 인바이트 리스트에 추가
 	else{
 		ch->addInvitedUser(new_user);
-		sendMessage(RPL_INVITE(user->getNickname(), token[1], token[2]), fd);
-		sendMessage(RPL_INVITING(user->getNickname(), token[1], token[2]), fd);
+		sendMessage(RPL_INVITE(user->getPrefix(), token[1], token[2]), fd);
+		sendMessage(RPL_INVITING(user->getPrefix(), token[1], token[2]), fd);
 	}
 }
 
@@ -302,7 +314,7 @@ void	Server::commandKick(std::vector<std::string> token, Client * user, int fd){
 	}
 	Channel *ch = searchChannel(token[1]);
 	Client	*kickUser = searchClient(token[2]);
-	std::string topic = getTotalMessage(2, token);
+	std::string msg = getTotalMessage(3, token);
 	if (!ch) {
 		sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
 		return ;
@@ -319,22 +331,26 @@ void	Server::commandKick(std::vector<std::string> token, Client * user, int fd){
 	else if (ch->isChannelUser(kickUser) == false){
 		sendMessage(ERR_USERNOTINCHANNEL(user->getNickname(), token[2], ch->getChannelName()), fd);
 	}
-	// 권한 없음 :: 킥할 유저가 오퍼레이터인데 사용자가 오퍼레이터가 아님
-	else if (ch->isChannelOperator(kickUser) == true && ch->isChannelOperator(user) == false){
-		sendMessage(ERR_CHANOPRIVSNEEDED(user->getNickname(), ch->getChannelName()), fd);
+	// 권한 없음 :: 사용자가 오퍼레이터가 아니고 오퍼레이터가 존재함
+	else if (ch->isChannelOperator(user) == false){
+		if (ch->getChannelOperator().size() == 0)
+			sendMessage(ERR_CHANOPRIVSNEEDED2(user->getNickname(), ch->getChannelName()), fd);
+		else
+			sendMessage(ERR_CHANOPRIVSNEEDED(user->getNickname(), ch->getChannelName()), fd);
 	}
 	//정상실행
 	else {
+		broadcastChannelMessage(RPL_KICK(user->getPrefix(), ch->getChannelName(), kickUser->getNickname(), msg), ch);
 		if (ch->isChannelOperator(kickUser) == true)
 			ch->removeChannelOperator(kickUser);
 		ch->removeChannelUser(kickUser);
-		broadcastChannelMessage(RPL_KICK(user->getNickname(), ch->getChannelName(), kickUser->getNickname()), ch);
+		if (ch->getUserCount() == 0){
+			removeChannelList(ch->getChannelName());
+		}
 	}
-	//오퍼레이터가 방에 없는 경우 -? 이건 뭔소리고
-		//ERR_CHANOPRIVSNEEDED2(user, channel)
-
 }
 
+//TOPIC #channel <new topic params>...
 void	Server::commandTopic(std::vector<std::string> token, Client * user, int fd) {
 	int tokensize = token.size();
 	if (tokensize == 1){
@@ -349,18 +365,13 @@ void	Server::commandTopic(std::vector<std::string> token, Client * user, int fd)
 	if (tokensize == 2) { //topic : view
 		std::string topic = ch->getChannelTopic();
 		if (topic == "" )
-			sendMessage(RPL_NOTOPIC(user->getNickname(), token[1]), fd);
+			sendMessage(RPL_NOTOPIC(user->getPrefix(), token[1]), fd);
 		else {
-			sendMessage(RPL_TOPIC(user->getNickname(), token[1], topic),fd);
+			sendMessage(RPL_TOPIC(user->getPrefix(), token[1], topic),fd);
 		}
 	}
 	else if (tokensize >= 3) { //set topic
 		std::string topic = getTotalMessage(2, token);
-		for (int i = 2; i < tokensize - 1; i++){
-			topic += token[i];
-			topic += " ";
-		}
-		topic += token[tokensize - 1];
 		if ((ch->checkChannelMode('t') == true) && (ch->isChannelOperator(user) == false)){
 			sendMessage(ERR_CHANOPRIVSNEEDED(user->getNickname(), token[1]), fd);
 			return;
@@ -378,18 +389,17 @@ void	Server::commandTopic(std::vector<std::string> token, Client * user, int fd)
 
 //에러 어떤 케이스인지 모르겠음...
 void	Server::commandQuit(std::vector<std::string> token, Client * user, int fd){
-	std::string msg = user->getNickname(); 
-	if (token.size() == 2)
-		msg = token[1];
-	else if(token.size() != 1){
-		sendMessage(ERR_NEEDMOREPARAMS(user->getNickname(), "QUIT"), fd);
-	}
-	Channel *ch;
+	std::string msg = getTotalMessage(1, token);
+	Channel		*ch;
 	for (std::map<std::string, Channel *>::iterator iter = _channel_list.begin(); \
 		iter != _channel_list.end(); iter++){
 			ch = iter->second;
 			if (ch->isChannelUser(user) == true)
 				broadcastChannelMessage(RPL_QUIT(user->getPrefix(), msg), ch, fd);
+				sendMessage(RPL_PART(user->getPrefix(), ch->getChannelName()), fd);
+				if(ch->isChannelOperator(user) == true)
+					ch->removeChannelOperator(user);
+				ch->removeChannelUser(user);
 		}
 	// sendMessage(ERR_QUIT(user->getPrefix(), msg), fd);
 	disconnectClient(fd, this->_clients);

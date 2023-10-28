@@ -235,7 +235,7 @@ void Server::parsingData(int fd) { //읽음
 			else if (tokenizer[0] == "PRIVMSG") {commandPrivmsg(tokenizer, user, fd);}
 			else if (tokenizer[0] == "QUIT") {commandQuit(tokenizer, user, fd);}
 			else if (tokenizer[0] == "TOPIC") {commandTopic(tokenizer, user, fd);}
-			// else if (tokenizer[0] == "INVITE") {}
+			else if (tokenizer[0] == "INVITE") {commandInvite(tokenizer, user, fd);}
 			else if (tokenizer[0] == "KICK") {commandKick(tokenizer, user, fd);}
 			else if (tokenizer[0] == "MODE") {commandMode(tokenizer, user, fd);}
 		}
@@ -279,7 +279,7 @@ Channel	*Server::searchChannel(std::string channel_name) {
 void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
 	_send_data[fd] += message;
 	std::cout << "msg to " << fd << ":\n" << message << std::endl; 
-	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
+	changeEvents(_change_list, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
 }
 
 void Server::broadcastChannelMessage(std::string message, Channel *ch) {
