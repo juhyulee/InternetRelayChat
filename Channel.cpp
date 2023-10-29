@@ -29,8 +29,9 @@
 // }
 
 Channel::Channel(const std::string& name, Client *client) :_name(name) {
-	initialize();
-	_operator.insert(std::make_pair(client->getSocketFd(), client));
+	this->initialize();
+	this->addChannelUser(client);
+	this->addChannelOperator(client);
 }
 
 Channel::~Channel() {}
@@ -81,6 +82,19 @@ const std::map<int, Client *>&	Channel::getUserList() const { return _user_list;
 const std::map<int, Client *>&	Channel::getInviteList() const { return _invite_list; }
 
 const std::map<int, Client *>&	Channel::getChannelOperator() const { return _operator; }
+
+const std::string Channel::getUserNameList() {
+	std::string res;
+	for (std::map <int, Client *> ::iterator iter = _user_list.begin();\
+	iter != _user_list.end(); iter++){
+		if (isChannelOperator(iter->second) == true){
+			res += "@";
+		}
+		res += iter->second->getNickname();
+		res += " ";
+	}
+	return (res);
+}
 
 //-------------------------------------------------------------------------------->>
 // Setter
@@ -237,6 +251,13 @@ void	Channel::setUserLimit(int new_limits) { _user_limit = new_limits; }
 
 void	Channel::clearChannelMode() { _mode.clear(); }
 
+bool Channel::checkChannelMode(char c)
+{
+	if (_mode.find(c) == _mode.end())
+		return false;
+	return true;
+}
+
 std::vector<std::string>	*Channel::getChannelModeParams() const {
 	std::vector<std::string>	*mode_params = new std::vector<std::string>;
 	std::string 				modes;
@@ -304,7 +325,16 @@ bool	Channel::isChannelUser(Client *client) { // 유저 목록에 있는지 확�
 	return _user_list.find(client->getSocketFd()) != _user_list.end();
 }
 
-Client	*Channel::findChannelUser(std::string nickname) {
+bool	Channel::isChannelUser(std::string nickname) { // 유저 목록에 있는지 확인
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+	iter != _user_list.end(); iter++) {
+		if (iter->second->getNickname() == nickname)
+			return true;
+	}
+	return false;
+}
+
+Client	*Channel::findChannelUser(std::string nickname) { // 유저 목록에서 찾아서 유저 리턴 / 없을경우 NULL
 	for (std::map<int, Client *>::iterator iter = _user_list.begin();
 		iter != _user_list.end(); iter++) {
 		if (iter->second->getNickname() == nickname) {
@@ -314,8 +344,19 @@ Client	*Channel::findChannelUser(std::string nickname) {
 	return NULL;
 }
 
+Client	*Channel::findChannelUser(Client *client) { // 유저 목록에서 찾아서 유저 리턴 / 없을경우 NULL
+	for (std::map<int, Client *>::iterator iter = _user_list.begin(); \
+	iter != _user_list.end(); iter++) {
+		if (iter->second == client)
+			return iter->second;
+	}
+	return NULL;
+}
+
+
 bool	Channel::addChannelUser(Client *client){  //유저 채널에 추가하는 함수
-	if (isChannelUser(client) == false) {
+	Client *user = findChannelUser(client);
+	if (!user) {
 		_user_list.insert(std::make_pair(client->getSocketFd(), client));
 		return true;
 	}
@@ -323,8 +364,10 @@ bool	Channel::addChannelUser(Client *client){  //유저 채널에 추가하는 �
 }
 
 bool	Channel::removeChannelUser(Client *client) { //유저 목록에서 지우는 함수
-	if (isChannelUser(client) == true) {
+	Client *user = findChannelUser(client);
+	if (user) {
 		_user_list.erase(client->getSocketFd());
+		std::cout << client->getNickname() << "is parted from channel "<< _name << std::endl;
 		return true;
 	}
 	return false;

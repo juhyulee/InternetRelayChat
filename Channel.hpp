@@ -32,6 +32,7 @@ class Channel {
 		const std::map<int, Client *>&		getUserList() const;
 		const std::map<int, Client *>&		getInviteList() const;
 		const std::map<int, Client *>&		getChannelOperator() const;
+		const std::string 					getUserNameList();
 
 		// Setter
 		void 						setChannelName(std::string new_name);
@@ -44,6 +45,8 @@ class Channel {
 		// Mode
 		void						clearChannelMode();
 		std::vector<std::string>	*getChannelModeParams() const;
+		bool 						checkChannelMode(char c);
+
 
 		// Operator
 		bool	isChannelOperator(Client *client);
@@ -54,7 +57,9 @@ class Channel {
 
 		// User
 		bool	isChannelUser(Client *client);				// 유저 목록에 있는지 확인
-		Client	*findChannelUser(std::string nickname);	// 유저 목록에서 검색
+		bool	isChannelUser(std::string nickname);		
+		Client	*findChannelUser(Client *client);			// 유저 목록에서 검색
+		Client	*findChannelUser(std::string nickname);
 		bool	addChannelUser(Client *client);				// 유저 목록에 추가
 		bool	removeChannelUser(Client *client);			// 유저 목록에서 지우기
 		void	clearUserList();

@@ -28,7 +28,7 @@
 # define ERR_USERONCHANNEL(user, nick, channel) "443 " + user + " " + nick + " " + channel + " :is already on channel" + "\r\n"
 // numeric
 # define RPL_WELCOME(user) "001 " + user + " :Welcome to the happyirc network " + user + "!" + "\r\n"
-# define RPL_TOPIC(user, channel, topic) "332 " + user + " " + channel + " " + topic + "\r\n"
+# define RPL_TOPIC(user, channel, topic) "332 " + user + " " + channel + " :" + topic + "\r\n"
 # define RPL_TOPICWHOTIME(user, channel, nick, setat) "333 " + user + " " + channel + " " + nick + " " + setat + "\r\n"
 # define RPL_WHOREPLY(client, channel, user, host, server, nick, opt, real) "352 " + client + " " + channel + " " + user + " " + host + " " + server + " " + nick + " " + opt + " " + ":0 " + real + "\r\n"
 # define RPL_ENDOFWHO(user, name) "315 " + user + " " + name + " :End of /WHO list" + "\r\n"
@@ -43,13 +43,15 @@
 # define RPL_CHANNELCREATETIME(user, channel, date) "329 " + user + " " + channel + " :" + date + "\r\n"
 # define RPL_ENDOFBANLIST(user, channel) "368 " + user + " " + channel + " :End of channel ban list" + "\r\n"
 // command
-# define RPL_QUIT(user, message) ":" + user + " QUIT :Quit: " + message + "\r\n"
-# define RPL_PONG(user, ping) ":" + user + " PONG :" + ping
+// origin
+// # define RPL_QUIT(user, message) ":" + user + " QUIT :Quit: " + message + "\r\n"
+# define RPL_QUIT(user, message) ":" + user + " QUIT :" + message + "\r\n"
+# define RPL_PONG(user, ping) ":" + user + " PONG :" + ping + "\r\n"
 # define RPL_JOIN(user, channel) ":" + user + " JOIN :" + channel + "\r\n"
 # define RPL_PRIVMSG(user, target, msg) ":" + user + " PRIVMSG " + target + " " + msg + "\r\n"
 # define RPL_MY_TOPIC(user, channel, topic) ":" + user + " TOPIC " + channel + " " + topic + "\r\n"
-# define RPL_PART(user, channel) ":" + user + " PART " + " :" + channel + "\r\n"
-# define RPL_KICK(user, channel, nick) ":" + user + " KICK " + channel + " " + nick + " :" + "\r\n"
+# define RPL_PART(user, channel) ":" + user + " PART "+ channel + "\r\n"
+# define RPL_KICK(user, channel, nick, message) ":" + user + " KICK " + channel + " " + nick + " :" + message+ "\r\n"
 # define RPL_INVITE(user, nick, channel) ":" + user + " INVITE " + nick + " :" + channel + "\r\n"
 # define RPL_MODE(user, channel, modes, params) ":" + user + " MODE " + channel + " " + modes + params + "\r\n"
 # define RPL_NICK(before, after) ":" + before + " NICK :" + after + "\r\n"

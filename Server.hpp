@@ -15,9 +15,10 @@ class Server {
 		const std::string&						getServerPassword() const;	// 서버 비밀번호 가져오기
 		const std::map<int, Client *>&			getUserList() const;		// 유저 목록 가져오기
 		const std::map<std::string, Channel *>&	getChannelList() const;		// 채널 목록 가져오기
+		bool									getAuth(Client const *user); // 인증 내역 확인하기
 
 		// Setter
-		void	setServerName(const std::string& server_name);						// 서버 이름 설정
+		void	setServerName(const std::string& server_name);
 		void	setServerPassword(const std::string& server_password);				// 서버 비밀번호 설정
 		void	addUserList(int fd, Client *user);									// 유저목록에 유저 추가
 		void	removeUserList(int fd);												// 유저목록에서 유저 삭제
@@ -37,9 +38,9 @@ class Server {
 		Channel	*searchChannel(std::string channel_name);				// 채널 검색
 
 		// Message
-		void	sendMessage(std::string message, int fd);						// 메세지 보내기
-		void	broadcastChannelMessage(std::string message);					// 채널에 메세지 보내기 (본인 포함)
-		void	broadcastChannelMessage(std::string message, int socket_fd);	// 채널에 메세지 보내기 (본인 제외)
+		void	sendMessage(std::string message, int fd);									// 메세지 보내기
+		void	broadcastChannelMessage(std::string message, Channel *ch);					// 채널에 메세지 보내기 (본인 포함)
+		void	broadcastChannelMessage(std::string message, Channel *ch, int socket_fd);				// 채널에 메세지 보내기 (본인 제외)
 
 		// Command
 		void	handleCommand(std::string command, int fd);								// 명령어 처리
@@ -47,26 +48,26 @@ class Server {
 		void	kickUser(std::string channel_name, std::vector<std::string> param);		// 유저 강퇴
 		void	inviteUser(std::string channel_name, std::vector<std::string> param);	// 유저 초대
 
-		Client	*searchClient(std::string nickname);									// 유저 검색
-		Client	*searchClient(int fd);													// 유저 검색
-		bool	getAuth(Client *user);													// 인증
-		bool	getAuth(int fd);
+		Client	*searchClient(std::string nickname);	// 유저 검색
+		Client	*searchClient(int fd);
+		Client	*searchTemp(int fd);					// 임시 유저 검색 - 인증 전 유저들
 
 		// Command
-		void	commandPass(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		void	commandNick(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		void	commandUser(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		void	commandJoin(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		void	commandPing(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		void	commandPart(std::vector<std::string> token, Client * user, int fd);
+		void	commandPass(std::vector<std::string> token, int fd);
+		void	commandNick(std::vector<std::string> token, int fd);
+		void	commandUser(std::vector<std::string> token, int fd);
+		void	commandPing(std::vector<std::string> token, Client * user, int fd);
 
+		void	commandJoin(std::vector<std::string> token, Client * user, int fd);
+		void	commandPart(std::vector<std::string> token, Client * user, int fd);
+		void	commandPrivmsg(std::vector<std::string> token, Client * user, int fd);
+		void	commandInvite(std::vector<std::string> token, Client * user, int fd);
+		void	commandQuit(std::vector<std::string> token, Client * user, int fd);
+		void	commandTopic(std::vector<std::string> token, Client * user, int fd);
+		void	commandMode(std::vector<std::string> token, Client * user, int fd);
 		//구현전 - 매개변수 임의로 넣어둠
-		// void	commandTopic(std::vector<std::string> token, int paramcnt, Client * user, int fd);
-		// void	commandQuit(std::vector<std::string> token, Client * user, int fd);
-		void	commandInvite(std::vector<std::string> token, int paramcnt, Client * user, int fd);	// 수도코드
-		void	commandKick(std::vector<std::string> token, int paramcnt, Client * user, int fd);	// 수도코드
-		void	commandMode(std::vector<std::string> token, Client *user, int fd);
-		//prvmsg
+		void	commandList(std::vector<std::string> token, Client * user, int fd);
+		void	commandKick(std::vector<std::string> token, Client * user, int fd);
 
 	private :
 		int							_server_socket;
@@ -85,6 +86,7 @@ class Server {
 		std::string							_server_password;	//서버비밀번호
 		std::map<std::string, Channel *>	_channel_list;		//채널목록
 		std::map<int, Client *>				_user_list;			//유저목록
+		std::map<int, Client *>				_temp_list;		//임시 유저 목록
 
 		Server(const Server& copy);
 		Server& operator=(const Server& obj);
