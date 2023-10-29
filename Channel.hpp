@@ -11,12 +11,13 @@ class Channel {
 	public :
 		class ChannelModeException : public std::exception {
 			public :
-				ChannelModeException();
 				ChannelModeException(const std::string& message);
 				~ChannelModeException() throw();
 				virtual const char	*what() const throw();
 			private:
 				std::string _message;
+
+				ChannelModeException();
 		};
 
 		Channel(const std::string& name, Client *client);
@@ -57,7 +58,7 @@ class Channel {
 
 		// User
 		bool	isChannelUser(Client *client);				// 유저 목록에 있는지 확인
-		bool	isChannelUser(std::string nickname);		
+		bool	isChannelUser(std::string nickname);
 		Client	*findChannelUser(Client *client);			// 유저 목록에서 검색
 		Client	*findChannelUser(std::string nickname);
 		bool	addChannelUser(Client *client);				// 유저 목록에 추가

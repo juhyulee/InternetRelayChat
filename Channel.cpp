@@ -128,24 +128,27 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 	* 초대 전용 채널로 설정 (i)
 	* 채널 오퍼레이터만 토픽을 설정할 수 있음 (t)
 	*/
-	std::vector<std::string> *mode_params = new std::vector<std::string>;
 	if (token[2][1] == 'i' || token[2][1] == 't') {
 		if (switch_mode == 0) {
 			if (_mode.find(token[2][1]) != _mode.end()) {
 				return NULL;
 			}
 			else {
+				std::vector<std::string> *mode_params = new std::vector<std::string>;
 				_mode.insert(token[2][1]);
 				mode_params->push_back(token[2]);
+				return mode_params;
 			}
 		}
-		else if (switch_mode == 1) {
+		else {
 			if (_mode.find(token[2][1]) == _mode.end()) {
 				return NULL;
 			}
 			else {
+				std::vector<std::string> *mode_params = new std::vector<std::string>;
 				_mode.erase(token[2][1]);
 				mode_params->push_back(token[2]);
+				return mode_params;
 			}
 		}
 	}
@@ -178,8 +181,10 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 					return NULL;
 				}
 				else {
+					std::vector<std::string> *mode_params = new std::vector<std::string>;
 					mode_params->push_back(token[2]);
 					mode_params->push_back(token[3]);
+					return mode_params;
 				}
 			}
 			else if (_mode.find(token[2][1]) == _mode.end()) {
@@ -196,8 +201,10 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 					setUserLimit(std::atoi(token[3].c_str()));
 				}
 				// reply params(command, parameter) 저장
+				std::vector<std::string> *mode_params = new std::vector<std::string>;
 				mode_params->push_back(token[2]);
 				mode_params->push_back(" " + token[3]);
+				return mode_params;
 			}
 			else {
 				// 변경하려는 모드(k, l)가 이미 적용된 경우 동작 확인 필요
@@ -212,8 +219,10 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 					return NULL;
 				}
 				if (removeChannelOperator(old_operator) == true) {
+					std::vector<std::string> *mode_params = new std::vector<std::string>;
 					mode_params->push_back(token[2]);
 					mode_params->push_back(" " + token[3]);
+					return mode_params;
 				}
 				else {
 					return NULL;
@@ -229,7 +238,9 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 					setUserLimit(100);
 				}
 				// reply 목록(command) 저장
+				std::vector<std::string> *mode_params = new std::vector<std::string>;
 				mode_params->push_back(token[2]);
+				return mode_params;
 			}
 			// 변경하려는 모드(k, l)가 이미 적용되지 않은 경우 동작 확인 필요
 			else {
@@ -237,10 +248,7 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 			}
 		}
 	}
-	else {
-		throw ChannelModeException(ERR_UNKNOWNMODE(client->getNickname(), token[2][1]));
-	}
-	return mode_params;
+	throw ChannelModeException(ERR_UNKNOWNMODE(client->getNickname(), token[2][1]));
 }
 
 void	Channel::setUserLimit(int new_limits) { _user_limit = new_limits; }

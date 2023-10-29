@@ -191,31 +191,30 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 	}
 	if (token[1][0] == '#') //channel mode
 	{
-		Channel *ch = searchChannel(token[1]);
-		if (ch == NULL) {
+		Channel *channel = searchChannel(token[1]);
+		if (channel == NULL) {
 			sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
 		}
 		else if (token.size() < 3) {//without modestring, just view mode
-			std::vector<std::string> *mode_params = ch->getChannelModeParams();
-			sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), ch->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
+			std::vector<std::string> *mode_params = channel->getChannelModeParams();
+			if (mode_params != NULL) {
+				sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
+			}
 		}
-		else if (ch->isChannelOperator(user) == false){ //without permission
-			sendMessage(ERR_CHANOPRIVSNEEDED(user->getNickname(), ch->getChannelName()), fd);
+		else if (channel->isChannelOperator(user) == false){ //without permission
+			sendMessage(ERR_CHANOPRIVSNEEDED(user->getNickname(), channel->getChannelName()), fd);
 		}
 		else {
 			try {
-				std::vector<std::string> *mode_params = ch->setChannelMode(token, user);
-				if (mode_params != NULL) {
-					broadcastChannelMessage(RPL_MODE(user->getPrefix(), ch->getChannelName(), (*mode_params)[0], (*mode_params)[1]), ch);
+				std::vector<std::string> *mode_params = channel->setChannelMode(token, user);
+				if (mode_params) {
+					broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), channel);
+					delete mode_params;
 				}
 			} catch (std::exception &e) {
 				sendMessage(e.what(), fd);
 			}
 		}
-	}
-	else { //user mode
-
-		return ;
 	}
 }
 
