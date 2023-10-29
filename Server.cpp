@@ -3,7 +3,7 @@
 #include <vector>
 
 //10.11.3.2
-//irssi -c 10.12.1.8 -p 8080 -w 1234 -n juhyulee
+//irssi -c 10.28.1.3 -p 8080 -w 1234 -n juhyulee
 //docker run -d --name ubuntu -p 80:80 -it --privileged ubuntu:20.04
 //서버네임 숫자 닉네임 메세지
 
@@ -56,7 +56,7 @@ void Server::serverInit(int argc, char **argv) {
 		exit(0);
 	}
 
-	if (listen(_server_socket, 5) == -1) {
+	if (listen(_server_socket, 20) == -1) {
 		std::cout << "listen error" << std::endl;
 		exit(0);
 	}
@@ -71,7 +71,7 @@ void Server::serverInit(int argc, char **argv) {
 	std::cout << "echo server started" <<std::endl;
 
 	while (1) {
-		_new_events = kevent(kq, &_change_list[0], _change_list.size(), _event_list, 8, NULL);
+		_new_events = kevent(kq, &_change_list[0], _change_list.size(), _event_list, 10, NULL);
 		if (_new_events == -1) {
 			std::cout << "kqueue() error" << std::endl;
 			exit(0);
@@ -108,7 +108,7 @@ void Server::serverInit(int argc, char **argv) {
 				}
 				else if (_clients.find(_curr_event->ident) != _clients.end()) {
 					char buf[1024];
-					int n = recv(_curr_event->ident, buf, sizeof(buf), 0);
+					int n = recv(_curr_event->ident, buf, sizeof(buf) - 1, 0);
 
 					if (n <= 0) {
 						if (n < 0)
@@ -116,15 +116,16 @@ void Server::serverInit(int argc, char **argv) {
 						disconnectClient(_curr_event->ident, _clients);
 					}
 					else {
+						std::map<int, std::string>::iterator it = _clients.find(_curr_event->ident);
 						buf[n] = '\0';
 						_clients[_curr_event->ident] += buf;
-						std::cout << "msg from " << _curr_event->ident << ":\n" << _clients[_curr_event->ident] << std::endl;
+						std::cout << "msg from " << it->second << ":\n" << _clients[_curr_event->ident] << std::endl;
 						parsingData(_curr_event->ident);
 						//===================parsing==============================
-						if (!_send_data[_curr_event->ident].empty()) {
-							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, _curr_event->udata);
-							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
-						}
+						// if (!_send_data[_curr_event->ident].empty()) {
+						// 	changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_DISABLE, 0, 0, _curr_event->udata);
+						// 	changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
+						// }
 					}
 				}
 			}
@@ -133,15 +134,15 @@ void Server::serverInit(int argc, char **argv) {
 				if (it != _clients.end()) {
 					if (!_send_data[_curr_event->ident].empty()) {//ㄴㅐ가 보보내내는는거
 						int n;
-						// std::cout << "send data from" << _curr_event->ident << ": " << _send_data[_curr_event->ident] << std::endl;
+						std::cout << "send data from" << it->second << ": " << _send_data[_curr_event->ident] << std::endl;
 						if ((n = send(_curr_event->ident, _send_data[_curr_event->ident].c_str(), _send_data[_curr_event->ident].size(), 0) == -1)) {
 							std::cerr << "client write error!" << std::endl;
 							disconnectClient(_curr_event->ident, _clients);
 						}
-						else { // 스코프 범위 다시 확실하게 변경
+						else {
 							_send_data[_curr_event->ident].clear();
-							changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
-							changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
+							// changeEvents(_change_list, _curr_event->ident, EVFILT_WRITE, EV_DISABLE, 0, 0, _curr_event->udata);
+							// changeEvents(_change_list, _curr_event->ident, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, _curr_event->udata);
 						}
 					}
 				}
@@ -193,7 +194,7 @@ void Server::parsingData(int fd) { //읽음
 			std::cout << "token : " << line << std::endl;
 		}
 		else {
-			std::cout << "parsing ERR" << std::endl;
+			std::cout << "remain : " << _clients[fd] << std::endl;
 			break;
 		}
 	}
@@ -278,8 +279,10 @@ Channel	*Server::searchChannel(std::string channel_name) {
 
 void Server::sendMessage(std::string message, int fd) { //메세지 보내는 함수
 	_send_data[fd] += message;
-	std::cout << "msg to " << fd << ":\n" << message << std::endl; 
-	changeEvents(_change_list, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+
+	// std::cout << "msg to " << fd << ":\n" << message << std::endl;
+	// changeEvents(_change_list, fd, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, NULL);
+
 }
 
 void Server::broadcastChannelMessage(std::string message, Channel *ch) {
