@@ -61,7 +61,7 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 	else if (ch->checkUserLimit() == -1){
 		this->sendMessage(ERR_CHANNELISFULL(user->getNickname(), channel_name), fd);
 	}
-	else if (ch->getChannelMode().find('i') != ch->getChannelMode().end()){
+	else if (ch->getChannelMode().find('i') != ch->getChannelMode().end() && ch->isInvitedUser(user) == false){
 		this->sendMessage(ERR_INVITEONLYCHAN(user->getNickname(), channel_name), fd);
 	}
 	else if (ch->checkInvite(fd) == -1 && ch->checkPassword(password) == -1){
@@ -381,6 +381,7 @@ void	Server::commandTopic(std::vector<std::string> token, Client * user, int fd)
 			return ;
 		}
 		else {
+				std::cout << topic << "::is topic" <<std::endl;
 				ch->setChannelTopic(topic);
 				broadcastChannelMessage(RPL_MY_TOPIC(user->getPrefix(), ch->getChannelName(), ch->getChannelTopic()), ch);
 		}

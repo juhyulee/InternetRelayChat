@@ -28,7 +28,7 @@
 # define ERR_USERONCHANNEL(user, nick, channel) "443 " + user + " " + nick + " " + channel + " :is already on channel" + "\r\n"
 // numeric
 # define RPL_WELCOME(user) "001 " + user + " :Welcome to the happyirc network " + user + "!" + "\r\n"
-# define RPL_TOPIC(user, channel, topic) "332 " + user + " " + channel + " " + topic + "\r\n"
+# define RPL_TOPIC(user, channel, topic) "332 " + user + " " + channel + " :" + topic + "\r\n"
 # define RPL_TOPICWHOTIME(user, channel, nick, setat) "333 " + user + " " + channel + " " + nick + " " + setat + "\r\n"
 # define RPL_WHOREPLY(client, channel, user, host, server, nick, opt, real) "352 " + client + " " + channel + " " + user + " " + host + " " + server + " " + nick + " " + opt + " " + ":0 " + real + "\r\n"
 # define RPL_ENDOFWHO(user, name) "315 " + user + " " + name + " :End of /WHO list" + "\r\n"
