@@ -44,6 +44,7 @@ void	Server::commandJoin(std::vector<std::string> token, Client * user, int fd){
 		if (ch->getChannelTopic() != ""){
 			this->sendMessage(RPL_TOPIC(user->getPrefix(), channel_name, ch->getChannelTopic()), fd);
 		}
+		ch->addChannelOperator(user);
 		this->sendMessage(RPL_NAMREPLY(user->getPrefix(), "=", channel_name, ch->getUserNameList()), fd);
 		this->sendMessage(RPL_ENDOFNAMES(user->getPrefix(), channel_name), fd);
 		return ;
@@ -295,7 +296,8 @@ void	Server::commandInvite(std::vector<std::string> token, Client * user, int fd
 	else{
 		ch->addInvitedUser(new_user);
 		sendMessage(RPL_INVITE(user->getPrefix(), token[1], token[2]), fd);
-		sendMessage(RPL_INVITING(user->getPrefix(), token[1], token[2]), fd);
+		Client *tmp_user = searchClient(token[1]);
+		sendMessage(RPL_INVITING(user->getPrefix(), token[1], token[2]), tmp_user->getSocketFd());
 	}
 }
 
@@ -358,6 +360,7 @@ void	Server::commandTopic(std::vector<std::string> token, Client * user, int fd)
 	}
 	if (tokensize == 2) { //topic : view
 		std::string topic = ch->getChannelTopic();
+		std::cout << "my topic is : " << topic << std::endl;
 		if (topic == "" )
 			sendMessage(RPL_NOTOPIC(user->getPrefix(), token[1]), fd);
 		else {
