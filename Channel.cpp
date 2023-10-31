@@ -1,8 +1,7 @@
 #include "Channel.hpp"
 #include "Client.hpp"
-#include "message.h"
-#include <sstream>
-#include <stdlib.h>
+#include "util.h"
+#include <cstdio>
 
 // -------------------------------------------------------------------------------->>
 // Orthodox Canonical Form
@@ -45,7 +44,7 @@ void	Channel::initialize() {
 	_operator = std::map<int, Client *>();
 	_topic = "";
 	_mode = std::set<char>();
-	_user_limit = 3;
+	_user_limit = CHANNEL_USER_LIMIT;
 	_user_list = std::map<int, Client *>();
 	_invite_list = std::map<int, Client *>();
 }
@@ -108,18 +107,12 @@ void	Channel::removeChannelPassword() { _password.erase(); }
 
 void	Channel::setChannelTopic(std::string new_topic) { _topic = new_topic; }
 
-std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token, Client *client) {
+std::vector<std::string>	Channel::setChannelMode(std::vector<std::string> token, Client *client) {
+	std::vector<std::string> mode_params = std::vector<std::string>();
 	if (token[2][0] != '+' && token[2][0] != '-') {
-		throw ChannelModeException(ERR_NOSUCHNICK(client->getNickname(), token[2]));
+		token[2].insert(0, "+");
 	}
-	// 설정하려는 모드가 없음
-	else if (token[2].length() == 1) {
-		throw ChannelModeException("hi");
-	}
-	// 설정하려는 모드가 여러개임
-	else if (token[2].length() > 2) {
-		throw ChannelModeException("hi");
-	}
+
 	int switch_mode = 0;
 	if (token[2][0] == '-') {
 		switch_mode = 1;
@@ -128,36 +121,139 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 	* 초대 전용 채널로 설정 (i)
 	* 채널 오퍼레이터만 토픽을 설정할 수 있음 (t)
 	*/
+	if (isChannelOperator(client) == false) { //without permission
+		throw ChannelModeException(ERR_CHANOPRIVSNEEDEDMODE(client->getNickname(), getChannelName(), token[2][1]));
+	}
 	if (token[2][1] == 'i' || token[2][1] == 't') {
 		if (switch_mode == 0) {
-			if (_mode.find(token[2][1]) != _mode.end()) {
-				return NULL;
-			}
-			else {
-				std::vector<std::string> *mode_params = new std::vector<std::string>;
+			if (_mode.find(token[2][1]) == _mode.end()) {
 				_mode.insert(token[2][1]);
-				mode_params->push_back(token[2]);
-				return mode_params;
+				mode_params.push_back(token[2]);
+				mode_params.push_back("");
 			}
+			return mode_params;
 		}
 		else {
-			if (_mode.find(token[2][1]) == _mode.end()) {
-				return NULL;
-			}
-			else {
-				std::vector<std::string> *mode_params = new std::vector<std::string>;
+			if (_mode.find(token[2][1]) != _mode.end()) {
 				_mode.erase(token[2][1]);
-				mode_params->push_back(token[2]);
-				return mode_params;
+				mode_params.push_back(token[2]);
+				mode_params.push_back("");
 			}
+			return mode_params;
 		}
 	}
 	/*
 	* 채널 패스워드 설정 (k)
-	* 채널 오퍼레이터 권한줌 (o)
-	* 채널 유저 수 제한 (l)
+	* 채널 오퍼레이터 권한 설정 (o)
+	* 채널 유저 수 제한 설정 (l)
 	*/
 	else if (token[2][1] == 'o' || token[2][1] == 'k' || token[2][1] == 'l') {
+		if (switch_mode == 0) {
+			if (token[2][1] == 'o') {
+				if (token.size() < 4) {
+					throw ChannelModeException(ERR_NOOPPARAM(client->getNickname(), _name, token[2][1], "op", "nick"));
+				}
+				Client *new_operator = findChannelUser(token[3]);
+				if (new_operator == NULL) {
+					throw ChannelModeException(ERR_NOSUCHNICK(client->getNickname(), token[3]));
+				}
+				if (addChannelOperator(new_operator)) {
+					mode_params.push_back(token[2]);
+					mode_params.push_back(' ' + token[3]);
+				}
+				return mode_params;
+			}
+			else if (token[2][1] == 'k') {
+				if (token.size() < 4) {
+					throw ChannelModeException(ERR_NOOPPARAM(client->getNickname(), _name, token[2][1], "key", "key"));
+				}
+				if (_mode.find(token[2][1]) == _mode.end()) {
+					_mode.insert(token[2][1]);
+					std::string new_password;
+					if (token[3].length() > 32) {
+						new_password = token[3].substr(0, 32);
+					}
+					else {
+						new_password = token[3];
+					}
+					setChannelPassword(new_password);
+					mode_params.push_back(token[2]);
+					mode_params.push_back(' ' + new_password);
+				}
+				return mode_params;
+			}
+			else {
+				if (token.size() < 4) {
+					throw ChannelModeException(ERR_NOOPPARAM(client->getNickname(), _name, token[2][1], "limit", "limit"));
+				}
+				if (_mode.find(token[2][1]) == _mode.end()) {
+					_mode.insert(token[2][1]);
+				}
+				long new_user_limit = std::atol(token[3].c_str());
+				setUserLimit(new_user_limit);
+				mode_params.push_back(token[2]);
+				std::stringstream ss;
+				ss << new_user_limit;
+				mode_params.push_back(' ' + ss.str());
+				return mode_params;
+			}
+		}
+		else {
+			if (token[2][1] == 'o') {
+				if (token.size() < 4) {
+					throw ChannelModeException(ERR_NOOPPARAM(client->getNickname(), _name, token[2][1], "op", "nick"));
+				}
+				Client *old_operator = findChannelUser(token[3]);
+				if (old_operator == NULL) {
+					throw ChannelModeException(ERR_NOSUCHNICK(client->getNickname(), token[3]));
+				}
+				if (removeChannelOperator(old_operator)) {
+					mode_params.push_back(token[2]);
+					mode_params.push_back(' ' + token[3]);
+				}
+				return mode_params;
+			}
+			else if (token[2][1] == 'k') {
+				if (_mode.find(token[2][1]) == _mode.end()) {
+					if (token.size() == 3) {
+						throw ChannelModeException(ERR_NOOPPARAM(client->getNickname(), _name, token[2][1], "key", "key"));
+					}
+					return mode_params;
+				}
+				if (token.size() >= 4) {
+					if (token[3] != getChannelPassword()) {
+						return mode_params;
+					}
+				}
+				_mode.erase(token[2][1]);
+				std::string old_password = getChannelPassword();
+				removeChannelPassword();
+				mode_params.push_back(token[2]);
+				mode_params.push_back(' ' + old_password);
+				return mode_params;
+			}
+			/* tokenize 이슈로 인해 테스트 불가 */
+			else {
+				if (_mode.find(token[2][1]) == _mode.end()) {
+					if (token.size() >= 4) {
+						std::cout << "token[2]: " << token[2] << std::endl;
+						std::cout << "token[3]: " << token[3] << std::endl;
+						throw ChannelModeException(ERR_UNKNOWNMODE(client->getNickname(), token[3][1]));
+						// throw ChannelModeException(ERR_UNKNOWNMODE(client->getPrefix(), token[3][1]));
+					}
+					return mode_params;
+				}
+				_mode.erase(token[2][1]);
+				setUserLimit(CHANNEL_USER_LIMIT);
+				mode_params.push_back(token[2]);
+				mode_params.push_back("");
+				return mode_params;
+			}
+		}
+	}
+	throw ChannelModeException(ERR_UNKNOWNMODE(client->getNickname(), token[2][1]));
+}
+		/*
 		if (token.size() < 4) {
 			if (token[2][1] == 'o') {
 				throw ChannelModeException(ERR_NOOPPARAM(client->getNickname(), _name, token[2][1], "op", "nick"));
@@ -181,9 +277,8 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 					return NULL;
 				}
 				else {
-					std::vector<std::string> *mode_params = new std::vector<std::string>;
-					mode_params->push_back(token[2]);
-					mode_params->push_back(token[3]);
+					mode_params.push_back(token[2]);
+					mode_params.push_back(token[3]);
 					return mode_params;
 				}
 			}
@@ -250,8 +345,9 @@ std::vector<std::string>	*Channel::setChannelMode(std::vector<std::string> token
 	}
 	throw ChannelModeException(ERR_UNKNOWNMODE(client->getNickname(), token[2][1]));
 }
+*/
 
-void	Channel::setUserLimit(int new_limits) { _user_limit = new_limits; }
+void	Channel::setUserLimit(long new_limits) { _user_limit = new_limits; }
 
 //-------------------------------------------------------------------------------->>
 // Mode
@@ -266,26 +362,22 @@ bool Channel::checkChannelMode(char c)
 	return true;
 }
 
-std::vector<std::string>	*Channel::getChannelModeParams() const {
-	std::vector<std::string>	*mode_params = new std::vector<std::string>;
-	std::string 				modes;
+std::vector<std::string>	Channel::getChannelModeParams() const {
+	std::vector<std::string>	mode_params = std::vector<std::string>();
+	mode_params.push_back("+");
+	mode_params.push_back("");
 	for (std::set<char>::iterator iter = _mode.begin();
 		iter != _mode.end(); iter++) {
-		modes.push_back(*iter);
-	}
-	mode_params->push_back(modes);
-	std::string	params;
-	for (std::string::size_type i = 0; i < modes.length(); i++) {
-		if (modes[i] == 'k') {
-			params += " " + _password;
+		mode_params[0].push_back(*iter);
+		if (*iter == 'k') {
+			mode_params[1] += " " + _password;
 		}
-		else if (modes[i] == 'l') {
+		else if (*iter == 'l') {
 			std::stringstream ss;
 			ss << _user_limit;
-			params += " " + ss.str();
+			mode_params[1] += " " + ss.str();
 		}
 	}
-	mode_params->push_back(params);
 	return mode_params;
 }
 

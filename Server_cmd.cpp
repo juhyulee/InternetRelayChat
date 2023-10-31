@@ -1,3 +1,4 @@
+#include "message.h"
 #include "util.h"
 #include "Server.hpp"
 
@@ -7,15 +8,15 @@
 // token 인자 중 합쳐서 string 만드는 것들 합쳐서 돌려주는 함수
 std::string getTotalMessage(size_t start, std::vector<std::string> token){
 	std::string	topic = "";
-	size_t		tokensize = token.size();
+	size_t	tokensize = token.size();
 	if (start > tokensize)
 		return topic;
 	if (token[start][0] == ':')
 		token[start] = &(token[start][1]);
-	for (size_t i = start; i < tokensize - 1; i++){
-			topic += token[i];
-			topic += " ";
-		}
+	for (size_t i = start; i < tokensize - 1; i++) {
+		topic += token[i];
+		topic += " ";
+	}
 	topic += token[tokensize - 1];
 	if (topic == ":")
 		return "";
@@ -185,31 +186,26 @@ void	Server::commandPing(std::vector<std::string> token, Client * user,  int fd)
 
 //MODE <target> [<modestring> [<mode arguments>...]]
 void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
-	if (token.size() < 2) {
-		sendMessage(ERR_NEEDMOREPARAMS(user->getPrefix(), token[0]), fd);
-		return ;
-	}
-	if (token[1][0] == '#') //channel mode
-	{
+	if (token.size() == 2) {
 		Channel *channel = searchChannel(token[1]);
 		if (channel == NULL) {
 			sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
+			return ;
 		}
-		else if (token.size() < 3) {//without modestring, just view mode
-			std::vector<std::string> *mode_params = channel->getChannelModeParams();
-			if (mode_params != NULL) {
-				sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), fd);
+		std::vector<std::string> mode_params = channel->getChannelModeParams();
+		sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), mode_params[0], mode_params[1]), fd);
+	}
+	else if (token.size() > 2) { //channel mode
+		if (token[1][0] == '#') {
+			Channel *channel = searchChannel(token[1]);
+			if (channel == NULL) {
+				sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
+				return ;
 			}
-		}
-		else if (channel->isChannelOperator(user) == false){ //without permission
-			sendMessage(ERR_CHANOPRIVSNEEDED(user->getNickname(), channel->getChannelName()), fd);
-		}
-		else {
 			try {
-				std::vector<std::string> *mode_params = channel->setChannelMode(token, user);
-				if (mode_params) {
-					broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), (*mode_params)[0], (*mode_params)[1]), channel);
-					delete mode_params;
+				std::vector<std::string> mode_params = channel->setChannelMode(token, user);
+				if (mode_params.empty() == false) {
+					broadcastChannelMessage(RPL_MODE(user->getPrefix(), channel->getChannelName(), mode_params[0], mode_params[1]), channel);
 				}
 			} catch (std::exception &e) {
 				sendMessage(e.what(), fd);

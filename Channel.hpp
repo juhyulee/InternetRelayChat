@@ -40,12 +40,12 @@ class Channel {
 		void 						setChannelPassword(std::string new_password);
 		void 						removeChannelPassword();
 		void  						setChannelTopic(std::string new_topic);
-		std::vector<std::string>	*setChannelMode(std::vector<std::string> token, Client *client);
-		void 						setUserLimit(int new_limits);
+		std::vector<std::string>	setChannelMode(std::vector<std::string> token, Client *client);
+		void 						setUserLimit(long new_limits);
 
 		// Mode
 		void						clearChannelMode();
-		std::vector<std::string>	*getChannelModeParams() const;
+		std::vector<std::string>	getChannelModeParams() const;
 		bool 						checkChannelMode(char c);
 
 

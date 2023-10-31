@@ -1,10 +1,10 @@
 #include "Server.hpp"
 #include "message.h"
 
-//10.11.3.2
-//irssi -c 10.28.1.3 -p 8080 -w 1234 -n juhyulee
-//docker run -d --name ubuntu -p 80:80 -it --privileged ubuntu:20.04
-//서버네임 숫자 닉네임 메세지
+// 10.18.225.179
+// irssi -c 10.18.225.179 -p 8080 -w 2323 -n yeongo
+// docker run -d --name ubuntu -p 80:80 -it --privileged ubuntu:20.04
+// 서버네임 숫자 닉네임 메세지
 
 Server::Server() {}
 
