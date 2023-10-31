@@ -49,7 +49,7 @@
 # define RPL_PONG(user, ping) ":" + user + " PONG :" + ping + "\r\n"
 # define RPL_JOIN(user, channel) ":" + user + " JOIN :" + channel + "\r\n"
 # define RPL_PRIVMSG(user, target, msg) ":" + user + " PRIVMSG " + target + " " + msg + "\r\n"
-# define RPL_MY_TOPIC(user, channel, topic) ":" + user + " TOPIC " + channel + " " + topic + "\r\n"
+# define RPL_MY_TOPIC(user, channel, topic) ":" + user + " TOPIC " + channel + " :" + topic + "\r\n"
 # define RPL_PART(user, channel) ":" + user + " PART "+ channel + "\r\n"
 # define RPL_KICK(user, channel, nick, message) ":" + user + " KICK " + channel + " " + nick + " :" + message+ "\r\n"
 # define RPL_INVITE(user, nick, channel) ":" + user + " INVITE " + nick + " :" + channel + "\r\n"
