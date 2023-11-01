@@ -1,4 +1,5 @@
 NAME	=	ircserv
+SERVER	=	$(NAME)
 
 SRCS_D	=	./
 SRCS_F	=	$(addsuffix	.cpp,			\
@@ -22,8 +23,6 @@ RM		=	rm -rf
 ifdef	DEBUG
 		DBFLAGS		+=	-fsanitize=address
 		SERVER		=	$(addsuffix _debug, $(NAME))
-else
-		SERVER		=	$(NAME)
 endif
 
 all	:	$(OBJS_D) $(SERVER)
