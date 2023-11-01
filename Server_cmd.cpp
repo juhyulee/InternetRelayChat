@@ -235,6 +235,9 @@ void	Server::commandPart(std::vector<std::string> token, Client * user, int fd) 
 		return ;
 	}
 	ch->removeChannelUser(user);
+	if (ch->getUserCount() == 0) {
+		deleteChannel(&ch);
+	}
 	sendMessage(RPL_PART(user->getPrefix(), token[1]), fd);
 	broadcastChannelMessage(RPL_PART(user->getPrefix(), token[1]), ch);
 	// std::cout <<"###" << RPL_PART(user->getPrefix(), token[1]) << std::endl;
@@ -395,6 +398,9 @@ void	Server::commandQuit(std::vector<std::string> token, Client * user, int fd){
 					ch->removeChannelOperator(user);
 				}
 				ch->removeChannelUser(user);
+			}
+			if (ch->getUserCount() == 0) {
+				deleteChannel(&ch);
 			}
 		}
 	// sendMessage(ERR_QUIT(user->getPrefix(), msg), fd);
