@@ -189,23 +189,19 @@ void	Server::commandPing(std::vector<std::string> token, Client * user,  int fd)
 //MODE <target> [<modestring> [<mode arguments>...]]
 void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 	if (token.size() == 2) {
-		if (token[1][0] != '#') {
-			sendMessage(ERR_UNKNOWNMODE(user->getNickname(), token[1]), fd);
-			return ;
-		}
 		Channel *channel = searchChannel(token[1]);
 		if (channel == NULL) {
 			sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
 			return ;
 		}
 		std::vector<std::string> mode_params = channel->getChannelModeParams();
-		sendMessage(RPL_CHANNELMODEIS(user->getPrefix(), channel->getChannelName(), mode_params[0], mode_params[1]), fd);
+		sendMessage(RPL_CHANNELMODEIS(user->getNickname(), channel->getChannelName(), mode_params[0], mode_params[1]), fd);
 	}
 	else if (token.size() > 2) { //channel mode
 		if (token[1][0] == '#') {
 			Channel *channel = searchChannel(token[1]);
 			if (channel == NULL) {
-				sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
+				sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
 				return ;
 			}
 			try {

@@ -239,7 +239,6 @@ std::vector<std::string>	Channel::setChannelMode(std::vector<std::string> token,
 						std::cout << "token[2]: " << token[2] << std::endl;
 						std::cout << "token[3]: " << token[3] << std::endl;
 						throw ChannelModeException(ERR_UNKNOWNMODE(client->getNickname(), token[3][1]));
-						// throw ChannelModeException(ERR_UNKNOWNMODE(client->getPrefix(), token[3][1]));
 					}
 					return mode_params;
 				}
