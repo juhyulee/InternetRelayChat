@@ -21,7 +21,7 @@ DBFLAGS	=	-g
 RM		=	rm -rf
 
 ifdef	DEBUG
-		DBFLAGS		+=	-fsanitize=address
+		DBFLAGS		+=	-fsanitize=address -g3
 		SERVER		=	$(addsuffix _debug, $(NAME))
 endif
 

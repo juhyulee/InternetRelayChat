@@ -117,7 +117,7 @@ void	Server::commandUser(std::vector<std::string> token, int fd)
 
 void	Server::commandPass(std::vector<std::string> token, int fd){
 	Client * user = NULL;
-	user = this->_temp_list.find(fd)->second;
+	std::map<int, Client *>::iterator iter = this->_temp_list.find(fd);
 	if(this->searchClient(fd) != NULL){
 		this->sendMessage(ERR_ALREADYREGISTERED(user->getNickname()), fd);
 	}
@@ -128,8 +128,9 @@ void	Server::commandPass(std::vector<std::string> token, int fd){
 		this->sendMessage(ERR_PASSWDMISMATCH((std::string)"root"), fd);
 		//disconnect?
 	}
-	else if (user != this->_temp_list.end()->second) // pass correct && temp user exist
+	else if (iter != _temp_list.end()) // pass correct && temp user exist
 	{
+		user = iter->second;
 		user->setPass();
 	}
 	else { // pass correct && temp user none
@@ -138,7 +139,7 @@ void	Server::commandPass(std::vector<std::string> token, int fd){
 		this->_temp_list.insert(std::make_pair(fd, user));
 	}
 	return ;
-};
+}
 
 
 
@@ -188,9 +189,13 @@ void	Server::commandPing(std::vector<std::string> token, Client * user,  int fd)
 //MODE <target> [<modestring> [<mode arguments>...]]
 void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 	if (token.size() == 2) {
+		if (token[1][0] != '#') {
+			sendMessage(ERR_UNKNOWNMODE(user->getNickname(), token[1]), fd);
+			return ;
+		}
 		Channel *channel = searchChannel(token[1]);
 		if (channel == NULL) {
-			sendMessage(ERR_NOSUCHCHANNEL(user->getPrefix(), token[1]), fd);
+			sendMessage(ERR_NOSUCHCHANNEL(user->getNickname(), token[1]), fd);
 			return ;
 		}
 		std::vector<std::string> mode_params = channel->getChannelModeParams();

@@ -287,6 +287,8 @@ void	Server::sendMessage(std::string message, int fd) {
 
 void Server::broadcastChannelMessage(std::string message, Channel *ch) {
 	std::cout <<"broadcasting " << std::endl;
+	if (!ch || ch->getUserCount() <= 0)
+		return ;
 	for (std::map<int, Client *>::const_iterator iter = ch->getUserList().begin(); \
 		iter != ch->getUserList().end(); ++iter) {
 		sendMessage(message, iter->second->getSocketFd());
@@ -295,6 +297,8 @@ void Server::broadcastChannelMessage(std::string message, Channel *ch) {
 
 void Server::broadcastChannelMessage(std::string message, Channel *ch, int socket_fd) {
 	std::cout <<"broadcasting except " << socket_fd << std::endl;
+	if (!ch || ch->getUserCount() <= 0)
+		return ;
 	for (std::map<int, Client *>::const_iterator iter = ch->getUserList().begin(); \
 		iter != ch->getUserList().end(); ++iter) {
 		if (iter->first != socket_fd) {
