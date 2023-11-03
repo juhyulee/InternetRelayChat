@@ -38,15 +38,18 @@ $(SERVER)	:	$(OBJS_S)
 $(OBJS_D)%.o	:	$(SRCS_D)%.cpp
 			$(CXX) $(CXXFLAGS) $(DBFLAGS) -c $< -o $@
 
-debug	:
-			@make DEBUG=1 all
-
 clean	:
 			$(RM) $(OBJS_D) $(OBJS_S)
 
 fclean	:	clean
 			$(RM) $(SERVER)
 
+debug	:
+			@make DEBUG=1 all
+
+rebug	:	clean
+			@make DEBUG=1 all
+
 re	:	fclean all
 
-.PHONY	:	all debug clean fclean re
+.PHONY	:	all clean fclean debug rebug re
