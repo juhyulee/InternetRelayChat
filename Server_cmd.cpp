@@ -213,6 +213,11 @@ void Server::commandMode(std::vector<std::string> token, Client *user, int fd) {
 				sendMessage(e.what(), fd);
 			}
 		}
+		else {
+			if (token[1] != user->getNickname()) {
+				sendMessage(ERR_NOSUCHNICK(user->getNickname(), token[1]), fd);
+			}
+		}
 	}
 }
 
